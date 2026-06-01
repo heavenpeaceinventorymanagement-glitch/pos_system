@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <title>Heaven Peace POS System</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input, button { width: 100%; padding: 10px; margin: 5px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        #adminPanel, #billingPanel { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="loginBox">
+    <h2>Login</h2>
+    <input type="password" id="pin" placeholder="PIN">
+    <button onclick="login()">LOGIN</button>
+</div>
+
+<div class="container" id="adminPanel">
+    <h3>Add Product (Admin Only)</h3>
+    <input type="text" id="barcode" placeholder="Barcode">
+    <input type="text" id="pName" placeholder="Product Name">
+    <input type="number" id="mrp" placeholder="MRP">
+    <input type="number" id="sPrice" placeholder="Sale Price">
+    <input type="number" id="stock" placeholder="Stock">
+    <button onclick="saveProduct()">SAVE PRODUCT</button>
+    <button onclick="showBilling()">SWITCH TO BILLING</button>
+</div>
+
+<div class="container" id="billingPanel">
+    <h3>Billing</h3>
+    <input type="text" id="scanCode" placeholder="Scan/Enter Barcode">
+    <button onclick="addToCart()">ADD TO CART</button>
+    <table>
+        <thead><tr><th>Item</th><th>Price</th></tr></thead>
+        <tbody id="cartBody"></tbody>
+    </table>
+    <h3>Total: Rs <span id="total">0</span></h3>
+    <button onclick="printInvoice()">PRINT INVOICE & PAY</button>
+</div>
+
+<script>
+    let cart = [];
+    let total = 0;
+    const scriptURL = 'YOUR_APPS_SCRIPT_URL'; // ഇവിടെ നിങ്ങളുടെ URL നൽകുക
+
+    function login() {
+        const pin = document.getElementById('pin').value;
+        if(pin === '1234') { document.getElementById('adminPanel').style.display = 'block'; document.getElementById('loginBox').style.display = 'none'; }
+        else if(pin === '1111') { document.getElementById('billingPanel').style.display = 'block'; document.getElementById('loginBox').style.display = 'none'; }
+        else alert('Wrong PIN');
+    }
+
+    function addToCart() {
+        let code = document.getElementById('scanCode').value;
+        // ഇവിടെ പ്രോഡക്റ്റ് ഫൈൻഡ് ചെയ്യാനുള്ള ലോജിക് വരും
+        cart.push({name: "Product", price: 100}); 
+        total += 100;
+        document.getElementById('cartBody').innerHTML += `<tr><td>Product</td><td>100</td></tr>`;
+        document.getElementById('total').innerText = total;
+    }
+
+    function printInvoice() {
+        window.print(); // ഇൻവോയ്സ് പ്രിന്റ് ചെയ്യാനുള്ള ഓപ്ഷൻ
+    }
+
+    function showBilling() {
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('billingPanel').style.display = 'block';
+    }
+</script>
+</body>
+</html>
