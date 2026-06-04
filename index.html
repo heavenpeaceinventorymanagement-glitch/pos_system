@@ -2,309 +2,275 @@
 <html lang="ml">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heaven Peace - Smart POS</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f4f7f6;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        header {
-            background-color: #1a252f;
-            color: white;
-            padding: 15px 20px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .nav-tabs {
-            display: flex;
-            background-color: #2c3e50;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            color: #bdc3c7;
-            padding: 14px 20px;
-            cursor: pointer;
-            font-size: 15px;
-            transition: 0.3s;
-        }
-
-        .tab-btn:hover, .tab-btn.active {
-            color: white;
-            background-color: #34495e;
-            border-bottom: 3px solid #2ecc71;
-        }
-
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            flex: 1;
-        }
-
-        .page-section {
-            display: none;
-        }
-
-        .page-section.active {
-            display: block;
-        }
-
-        h2 {
-            margin-bottom: 20px;
-            color: #2c3e50;
-            border-bottom: 2px solid #ecf0f1;
-            padding-bottom: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        input[type="text"], input[type="number"], select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-primary { background-color: #3498db; color: white; }
-        .btn-success { background-color: #2ecc71; color: white; }
-        .btn-danger { background-color: #e74c3c; color: white; }
-
-        .pos-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .pos-grid { grid-template-columns: 1fr; }
-        }
-
-        .billing-cart {
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 15px;
-            background: #fafafa;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-
-        th { background-color: #f2f2f2; }
-
-        .total-section {
-            margin-top: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: right;
-        }
-
-        .combo-product-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        /* പ്രിന്റ് ചെയ്യുമ്പോൾ തെർമൽ പ്രിന്റർ സൈസ് വരാൻ വേണ്ടി */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #print-area, #print-area * {
-                visibility: visible;
-            }
-            #print-area {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 80mm;
-                font-size: 12px;
-            }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Heaven Peace Premium Cloud POS v7</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
-<body>
+<body class="h-screen flex flex-col overflow-hidden select-none bg-slate-50">
 
-    <header>Heaven Peace - Management System</header>
-
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('billing')">Billing (POS)</button>
-        <button class="tab-btn" onclick="switchTab('recent-bills')">Recent Bills (പഴയ ബില്ലുകൾ)</button>
-        <button class="tab-btn" onclick="switchTab('admin')">Admin Panel</button>
+    <div id="printSection" class="hidden">
+        <div id="printContent"></div>
     </div>
 
-    <div class="container">
-        
-        <section id="billing" class="page-section active">
-            <h2>Billing & Checkout</h2>
-            <div class="pos-grid">
-                <div>
-                    <h3>Select Products</h3>
-                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="addSampleToCart()">ടെസ്റ്റ് ഐറ്റം കാർട്ടിലേക്ക് കൂട്ടുക</button>
-                </div>
-                
-                <div class="billing-cart">
-                    <div id="print-area">
-                        <div style="text-align: center; margin-bottom: 10px;">
-                            <h3>HEAVEN PEACE</h3>
-                            <p>Smart Billing Receipt</p>
-                            <p id="bill-time"></p>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Qty</th>
-                                    <th>Price</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cart-table-body">
-                                <tr id="empty-row">
-                                    <td colspan="3" style="text-align: center; color: #888;">Cart is empty</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="total-section">
-                            Total: ₹<span id="cart-total">0.00</span>
-                        </div>
-                    </div>
-                    <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="printAndSaveBill()">Print & Save Bill</button>
-                </div>
+    <header class="bg-slate-900 text-white px-4 md:px-6 py-3.5 flex justify-between items-center shadow-md z-20 shrink-0">
+        <div class="flex items-center gap-3 md:gap-4">
+            <button onclick="toggleMenu()" class="cursor-pointer hover:bg-slate-800 p-2 rounded-lg flex items-center justify-center">
+                <span class="material-icons text-slate-300">menu</span>
+            </button>
+            <div class="flex items-center gap-1.5">
+                <span class="material-icons text-blue-500 text-xl md:text-2xl">point_of_sale</span>
+                <span class="text-base md:text-lg font-bold tracking-wider text-white">HEAVEN PEACE <span class="text-[10px] bg-blue-600 px-1.5 py-0.5 rounded ml-1">CLOUD</span></span>
             </div>
-        </section>
+        </div>
+        <div>
+            <div id="roleBadge" class="bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-full text-[11px] md:text-xs font-semibold flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="roleText">EMPLOYEE ACCESS</span>
+            </div>
+        </div>
+    </header>
 
-        <section id="recent-bills" class="page-section">
-            <h2>Recent Bills (അവസാനമായി അടിച്ച ബില്ലുകൾ)</h2>
-            <p style="margin-bottom: 10px; color: #666;">ഇവിടെ നിങ്ങൾക്ക് അവസാനമായി ചെയ്ത ബില്ലുകൾ കാണാനും വീണ്ടും പ്രിന്റ് ചെയ്യാനും സാധിക്കും.</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Bill ID</th>
-                        <th>Date & Time</th>
-                        <th>Total Amount</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="recent-bills-table-body">
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: #888;">ബില്ലുകൾ ലോഡ് ചെയ്യുന്നു...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
+    <div id="sideMenu" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 shadow-2xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col border-r border-slate-800">
+        <div class="p-5 bg-slate-950 flex justify-between items-center border-b border-slate-800">
+            <span class="font-bold tracking-wide text-white">MAIN NAVIGATION</span>
+            <button onclick="toggleMenu()" class="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800"><span class="material-icons">close</span></button>
+        </div>
+        <nav class="flex-1 p-3 space-y-1">
+            <button onclick="switchView('billing')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white flex items-center gap-3.5 transition group cursor-pointer">
+                <span class="material-icons text-slate-400 group-hover:text-blue-500">receipt_long</span> 
+                <span class="text-sm font-medium">Billing Screen</span>
+            </button>
+            <button onclick="switchView('recent')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white flex items-center gap-3.5 transition group cursor-pointer">
+                <span class="material-icons text-slate-400 group-hover:text-purple-500">history_edu</span> 
+                <span class="text-sm font-medium">Recent Bills (പഴയ ബില്ലുകൾ)</span>
+            </button>
+            <button onclick="checkAdminAccess('admin')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white flex items-center gap-3.5 transition group cursor-pointer">
+                <span class="material-icons text-slate-400 group-hover:text-amber-500">inventory</span> 
+                <span class="text-sm font-medium">Admin & Inventory</span>
+            </button>
+        </nav>
+        <div class="p-4 bg-slate-950 border-t border-slate-800">
+            <button id="loginLogoutBtn" onclick="openLoginModal()" class="w-full bg-blue-600 text-white text-center py-2.5 rounded-xl font-semibold hover:bg-blue-500 transition text-sm">
+                Admin Login
+            </button>
+        </div>
+    </div>
 
-        <section id="admin" class="page-section">
-            <h2>Admin Panel - Add Product / Combo Offer</h2>
-            <div class="form-group">
-                <label for="item-type">Item Type:</label>
-                <select id="item-type" onchange="toggleItemType()">
-                    <option value="single">Single Product</option>
-                    <option value="combo">Combo Offer</option>
-                </select>
+    <main class="flex-1 overflow-hidden relative">
+
+        <div id="billingView" class="h-full flex flex-col lg:flex-row p-3 md:p-5 gap-4 md:gap-5">
+            <div class="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col h-full overflow-hidden">
+                <div class="flex gap-2 mb-3 items-center">
+                    <div class="flex-1 relative">
+                        <span class="material-icons absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
+                        <input type="text" id="barcodeInput" placeholder="Scan Barcode / Type Name..." 
+                               class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 text-xs md:text-sm text-slate-800"
+                               onkeypress="handleBarcode(event)">
+                    </div>
+                    <button onclick="toggleCameraScanner()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-xl flex items-center gap-1 text-xs font-bold shadow-xs cursor-pointer shrink-0">
+                        <span class="material-icons text-sm">videocam</span> <span>Scan</span>
+                    </button>
+                </div>
+
+                <div id="scannerContainer" class="hidden bg-slate-900 border rounded-2xl p-3 mb-3 relative max-w-md mx-auto w-full">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-emerald-400 font-bold flex items-center gap-1 animate-pulse">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live Scanner Active
+                        </span>
+                        <button onclick="toggleCameraScanner()" class="text-slate-400 hover:text-white text-xs font-bold">CLOSE</button>
+                    </div>
+                    <div id="interactiveScannerView" class="w-full overflow-hidden rounded-xl bg-black aspect-video"></div>
+                </div>
+
+                <div class="flex bg-slate-100 p-1 rounded-xl mb-3 gap-1 shrink-0">
+                    <button id="tab-products" onclick="switchCategoryTab('products')" class="flex-1 py-2 text-xs font-bold rounded-lg bg-white text-blue-600 shadow-sm cursor-pointer">Products</button>
+                    <button id="tab-packing" onclick="switchCategoryTab('packing')" class="flex-1 py-2 text-xs font-bold rounded-lg text-slate-600 hover:bg-white/50 cursor-pointer">Packing Materials</button>
+                    <button id="tab-combos" onclick="switchCategoryTab('combos')" class="flex-1 py-2 text-xs font-bold rounded-lg text-slate-600 hover:bg-white/50 cursor-pointer">Combos</button>
+                </div>
+
+                <div class="bg-slate-50 p-2.5 rounded-xl flex text-[11px] font-bold text-slate-400 uppercase px-4 mb-2">
+                    <div class="w-12">Photo</div>
+                    <div class="flex-1 pl-3">Product / Variant Details</div>
+                    <div class="w-44 text-center">Options</div>
+                    <div class="w-20 text-center">Barcode</div>
+                    <div class="w-20 text-right">Price</div>
+                </div>
+
+                <div id="productsListView" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
             </div>
 
-            <div id="single-product-form">
-                <div class="form-group">
-                    <label for="prod-name">Product Name:</label>
-                    <input type="text" id="prod-name" placeholder="Enter Product Name">
-                </div>
-                <div class="form-group">
-                    <label for="prod-price">Price (₹):</label>
-                    <input type="number" id="prod-price" placeholder="0.00">
-                </div>
-                <div class="form-group">
-                    <label for="prod-stock">Stock/Quantity:</label>
-                    <input type="number" id="prod-stock" placeholder="1" value="1">
-                </div>
-            </div>
-
-            <div id="combo-product-form" style="display: none;">
-                <div class="form-group">
-                    <label for="combo-name">Combo Pack Name:</label>
-                    <input type="text" id="combo-name" placeholder="e.g., Luxury Gift Box Combo">
-                </div>
-                <div class="form-group">
-                    <label for="combo-price">Combo Special Price (₹):</label>
-                    <input type="number" id="combo-price" placeholder="0.00">
-                </div>
-                
-                <div id="combo-products-container">
-                    <label>Items inside this Combo:</label>
-                    <div class="combo-product-row">
-                        <input type="text" class="combo-product-name" placeholder="Product Name 1" required>
-                        <input type="number" class="combo-product-qty" placeholder="Qty" min="1" value="1" required>
+            <div class="lg:hidden fixed bottom-4 left-4 right-4 z-20">
+                <button onclick="toggleMobileCart(true)" class="w-full bg-slate-900 text-white py-3.5 px-5 rounded-xl font-bold text-sm shadow-xl flex justify-between items-center cursor-pointer">
+                    <div class="flex items-center gap-2">
+                        <span class="material-icons text-blue-400">shopping_basket</span>
+                        <span>VIEW CART (<span id="mobileCartCount">0</span>)</span>
                     </div>
-                    <div class="combo-product-row">
-                        <input type="text" class="combo-product-name" placeholder="Product Name 2" required>
-                        <input type="number" class="combo-product-qty" placeholder="Qty" min="1" value="1" required>
-                    </div>
-                </div>
-
-                <button type="button" id="add-more-product-btn" class="btn btn-primary" style="background-color: #28a745; margin-top: 10px;">
-                    + Add More Item (Combo Component)
+                    <span id="mobileCartTotal" class="font-mono text-emerald-400 text-base">₹0.00</span>
                 </button>
             </div>
 
-            <div class="form-group" style="margin-top: 20px;">
-                <button class="btn btn-success" onclick="saveData()">Save Item to Firebase</button>
-            </div>
-        </section>
+            <div id="cartSheetOverlay" onclick="toggleMobileCart(false)" class="hidden fixed inset-0 bg-black/40 z-30 lg:hidden"></div>
+            
+            <div id="cartSection" class="fixed bottom-0 left-0 right-0 max-h-[85vh] lg:max-h-none rounded-t-3xl lg:rounded-t-none lg:static bg-white lg:w-96 rounded-2xl border border-slate-200 shadow-2xl lg:shadow-sm flex flex-col h-full overflow-hidden z-30 lg:z-0 transition-transform duration-300 lg:translate-y-0 translate-y-full lg:block">
+                <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto my-2.5 lg:hidden"></div>
+                <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center shrink-0">
+                    <span class="font-bold text-slate-700 text-xs tracking-wide">CURRENT ORDER</span>
+                    <button onclick="clearCart()" class="text-red-500 text-xs font-bold px-2 py-1 rounded-lg hover:bg-red-50">CLEAR ALL</button>
+                </div>
+                
+                <div id="cartList" class="flex-1 overflow-y-auto p-4 space-y-2.5 content-start">
+                    <div id="emptyCartText" class="text-center my-14 flex flex-col items-center justify-center gap-2">
+                        <span class="material-icons text-slate-300 text-4xl">add_shopping_cart</span>
+                        <p class="text-slate-400 text-xs">Cart ഒഴിഞ്ഞു കിടക്കുന്നു.</p>
+                    </div>
+                </div>
 
+                <div class="p-4 border-t border-slate-100 bg-slate-50 space-y-3 shrink-0 pb-6 lg:pb-4">
+                    <div class="flex justify-between text-xs font-medium text-slate-500">
+                        <span>Subtotal</span>
+                        <span id="subtotalPrice" class="font-mono text-slate-700 font-bold">₹0.00</span>
+                    </div>
+                    <div class="pt-2 border-t border-dashed border-slate-200 flex justify-between items-baseline">
+                        <span class="text-sm font-bold text-slate-800">Net Payable</span>
+                        <span id="totalPrice" class="font-mono text-xl font-extrabold text-emerald-600">₹0.00</span>
+                    </div>
+                    <button onclick="triggerInvoiceBillPrint()" class="w-full bg-emerald-600 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-500 transition cursor-pointer flex justify-center items-center gap-2">
+                        <span class="material-icons text-sm">print</span> COMPLETE & PRINT BILL
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="recentView" class="h-full p-4 md:p-6 overflow-y-auto hidden space-y-4">
+            <h2 class="text-xl font-bold text-slate-800 border-b pb-3 border-slate-200">Recent Bills (അവസാനമായി ചെയ്ത ബില്ലുകൾ)</h2>
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[600px]">
+                        <thead>
+                            <tr class="text-slate-400 text-xs font-bold uppercase border-b border-slate-100 bg-slate-50">
+                                <th class="p-4">Bill ID</th>
+                                <th class="p-4">Date & Time</th>
+                                <th class="p-4">Total Amount</th>
+                                <th class="p-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentBillsTableBody" class="text-slate-600 text-xs font-medium divide-y divide-slate-100">
+                            <tr>
+                                <td colspan="4" class="text-center py-8 text-slate-400">ബില്ലുകൾ ഒന്നും ലഭ്യമല്ല.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="adminView" class="h-full p-4 md:p-6 overflow-y-auto hidden space-y-6">
+            <div class="flex justify-between items-center border-b pb-3 border-slate-200">
+                <h2 class="text-xl font-bold text-slate-800">Admin Inventory Manager (Cloud)</h2>
+                <button id="cancelEditFormBtn" onclick="resetAdminForm()" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold hidden cursor-pointer">Cancel Edit Mode</button>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm max-w-3xl">
+                <h3 id="formTitle" class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center gap-1.5">
+                    <span class="material-icons text-blue-500 text-lg">add_box</span> പുതിയ പ്രൊഡക്റ്റ് / കോംബോ ചേർക്കുക
+                </h3>
+                <input type="hidden" id="editProductId">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 block mb-1">PRODUCT NAME</label>
+                        <input type="text" id="adminPName" class="w-full border border-slate-200 rounded-xl p-2.5 text-sm focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 block mb-1">CHOOSE CATEGORY</label>
+                        <select id="adminPCategory" onchange="toggleAdminVariantFields()" class="w-full border border-slate-200 rounded-xl p-2.5 text-sm bg-white focus:outline-none">
+                            <option value="products">Standard Product</option>
+                            <option value="packing">Packing Materials</option>
+                            <option value="combos">Combos (Multiple Packs)</option>
+                        </select>
+                    </div>
+                    <div id="singlePriceArea">
+                        <label class="text-xs font-bold text-slate-400 block mb-1">BASE PRICE (₹)</label>
+                        <input type="number" id="adminPPrice" class="w-full border border-slate-200 rounded-xl p-2.5 text-sm focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 block mb-1">MAIN IMAGE LINK</label>
+                        <input type="text" id="adminPImage" placeholder="https://..." class="w-full border border-slate-200 rounded-xl p-2.5 text-sm focus:outline-none">
+                    </div>
+                </div>
+
+                <div id="variantPriceArea" class="hidden mt-4 p-4 bg-slate-50 border border-dashed rounded-xl space-y-4">
+                    <div class="p-3 bg-white rounded-xl border border-slate-200 space-y-2">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="vOpt1Name" value="5 Pcs Pack" class="border rounded-lg p-2 text-xs">
+                            <input type="number" id="vOpt1Price" class="border rounded-lg p-2 text-xs" placeholder="Price">
+                        </div>
+                        <input type="text" id="vOpt1Img" class="w-full border rounded-lg p-2 text-xs" placeholder="Image URL">
+                        <input type="text" id="vOpt1Desc" class="w-full border rounded-lg p-2 text-xs" placeholder="Description">
+                    </div>
+                    <div class="p-3 bg-white rounded-xl border border-slate-200 space-y-2">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="vOpt2Name" value="10 Pcs Pack" class="border rounded-lg p-2 text-xs">
+                            <input type="number" id="vOpt2Price" class="border rounded-lg p-2 text-xs" placeholder="Price">
+                        </div>
+                        <input type="text" id="vOpt2Img" class="w-full border rounded-lg p-2 text-xs" placeholder="Image URL">
+                        <input type="text" id="vOpt2Desc" class="w-full border rounded-lg p-2 text-xs" placeholder="Description">
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-end">
+                    <button id="submitFormBtn" onclick="adminSaveProduct()" class="bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-500 cursor-pointer">
+                        Save to Cloud
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-50 border-b border-slate-100">
+                    <h3 class="font-bold text-slate-700 text-sm">Cloud Realtime Database</h3>
+                </div>
+                <div class="p-2 md:p-4 overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[750px]">
+                        <thead>
+                            <tr class="text-slate-400 text-xs font-bold uppercase border-b border-slate-100">
+                                <th class="pb-3 pl-2">Photo</th>
+                                <th class="pb-3">Product Name</th>
+                                <th class="pb-3">Category</th>
+                                <th class="pb-3 w-48">Details</th>
+                                <th class="pb-3 text-center">Barcode</th>
+                                <th class="pb-3 text-right pr-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminInventoryTableBody" class="text-slate-600 text-xs font-medium"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="loginModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border border-slate-100">
+            <h3 class="text-sm font-bold text-slate-800 mb-3 border-b pb-2">Admin Cloud Login</h3>
+            <div class="space-y-3">
+                <input type="text" id="usernameInput" placeholder="USERNAME" class="w-full border border-slate-200 rounded-xl p-2.5 text-sm">
+                <input type="password" id="passwordInput" placeholder="PASSWORD" class="w-full border border-slate-200 rounded-xl p-2.5 text-sm">
+                <p id="loginError" class="text-[11px] text-red-500 font-bold hidden">തെറ്റായ ലോഗിൻ വിവരങ്ങൾ!</p>
+                <div class="flex gap-2 pt-2">
+                    <button onclick="closeLoginModal()" class="flex-1 bg-slate-100 text-slate-500 text-xs font-bold py-2.5 rounded-xl">CANCEL</button>
+                    <button onclick="attemptLogin()" class="flex-1 bg-blue-600 text-white text-xs font-bold py-2.5 rounded-xl">VERIFY</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script type="module">
-        // നിങ്ങൾ നൽകിയ പുതിയ Firebase v12.14.0 SDK ഇംപോർട്ട് ചെയ്യുന്നു
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // നിങ്ങളുടെ ഒറിജിനൽ ഫയർബേസ് കോൺഫിഗറേഷൻ
+        // നിങ്ങളുടെ കറക്റ്റ് ആയ ഒറിജിനൽ ഫയർബേസ് വിവരങ്ങൾ
         const firebaseConfig = {
             apiKey: "AIzaSyCZQrqEz8UElnroPDqIEGEUc7YL0qZzi7A",
             authDomain: "heaven-peace-pos.firebaseapp.com",
@@ -317,203 +283,566 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const db = getFirestore(app);
+        const productsRef = collection(db, "products");
+        const billsRef = collection(db, "bills"); // ബില്ലുകൾക്കുള്ള റെഫറൻസ്
 
-        let currentCart = [];
+        // GLOBAL ENGINE STATE
+        window.productsDatabase = [];
+        window.currentActiveTab = 'products';
+        window.cart = [];
+        window.isAdminLoggedIn = false;
+        window.isEditMode = false;
+        let html5QrcodeScanner = null;
 
-        // ടാബ് മാറ്റാൻ
-        window.switchTab = function(tabId) {
-            document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
-
-            if(tabId === 'recent-bills') {
-                loadRecentBills();
-            }
-        }
-
-        window.toggleItemType = function() {
-            const type = document.getElementById('item-type').value;
-            document.getElementById('single-product-form').style.display = type === 'single' ? 'block' : 'none';
-            document.getElementById('combo-product-form').style.display = type === 'combo' ? 'block' : 'none';
-        }
-
-        // പ്ലസ് ബട്ടൺ അമർത്തുമ്പോൾ കൂടുതൽ ഫീൽഡ് വരാൻ (4-ഓ 5-ഓ എണ്ണം വരെ കൂട്ടാം)
-        document.getElementById('add-more-product-btn').addEventListener('click', function() {
-            const container = document.getElementById('combo-products-container');
-            const rowCount = container.getElementsByClassName('combo-product-row').length + 1;
-            const newRow = document.createElement('div');
-            newRow.className = 'combo-product-row';
-            newRow.style.marginTop = "10px";
-            newRow.innerHTML = `
-                <input type="text" class="combo-product-name" placeholder="Product Name ${rowCount}" required>
-                <input type="number" class="combo-product-qty" placeholder="Qty" min="1" value="1" required>
-                <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">X</button>
-            `;
-            container.appendChild(newRow);
+        // REALTIME CLOUD PRODUCTS LISTENER
+        onSnapshot(productsRef, (snapshot) => {
+            window.productsDatabase = [];
+            snapshot.forEach((doc) => {
+                let data = doc.data();
+                data.id = doc.id;
+                window.productsDatabase.push(data);
+            });
+            renderBillingProductsList();
+            renderAdminInventoryTable();
         });
 
-        // ടെസ്റ്റിംഗിനായി കാർട്ടിലേക്ക് സാധനം ചേർക്കാൻ
-        window.addSampleToCart = function() {
-            currentCart.push({ name: "Heaven Peace Gift Box", qty: 1, price: 450 });
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            const tbody = document.getElementById('cart-table-body');
-            tbody.innerHTML = '';
-            let total = 0;
+        // REALTIME CLOUD BILLS LISTENER (Recent Bills നിരന്തരം അപ്ഡേറ്റ് ചെയ്യാൻ)
+        const qBills = query(billsRef, orderBy("timestamp", "desc"));
+        onSnapshot(qBills, (snapshot) => {
+            const body = document.getElementById('recentBillsTableBody');
+            body.innerHTML = "";
             
-            currentCart.forEach(item => {
-                total += (item.price * item.qty);
-                tbody.innerHTML += `<tr><td>${item.name}</td><td>${item.qty}</td><td>₹${item.price}</td></tr>`;
-            });
-            
-            document.getElementById('cart-total').innerText = total.toFixed(2);
-            document.getElementById('bill-time').innerText = new Date().toLocaleString();
-        }
-
-        // പുതിയ പ്രൊഡക്റ്റുകളും കോംബോകളും ഫയർബേസിലേക്ക് സേവ് ചെയ്യാൻ
-        window.saveData = async function() {
-            const itemType = document.getElementById('item-type').value;
-
-            try {
-                if (itemType === 'single') {
-                    const name = document.getElementById('prod-name').value;
-                    const price = parseFloat(document.getElementById('prod-price').value);
-                    const stock = parseInt(document.getElementById('prod-stock').value) || 1;
-
-                    if (!name || isNaN(price)) {
-                        alert("ദയവായി വിവരങ്ങൾ കൃത്യമായി നൽകുക!");
-                        return;
-                    }
-
-                    await addDoc(collection(db, "products"), {
-                        name: name,
-                        price: price,
-                        stock: stock,
-                        type: "single",
-                        timestamp: new Date()
-                    });
-
-                    alert("ഉൽപ്പന്നം ഫയർബേസിൽ വിജയകരമായി സേവ് ചെയ്തു!");
-                    document.getElementById('prod-name').value = '';
-                    document.getElementById('prod-price').value = '';
-
-                } else {
-                    const comboName = document.getElementById('combo-name').value;
-                    const comboPrice = parseFloat(document.getElementById('combo-price').value);
-                    
-                    const productNames = document.getElementsByClassName('combo-product-name');
-                    const productQtys = document.getElementsByClassName('combo-product-qty');
-                    
-                    let comboItemsList = [];
-                    for (let i = 0; i < productNames.length; i++) {
-                        if (productNames[i].value.trim() !== "") {
-                            comboItemsList.push({
-                                name: productNames[i].value,
-                                qty: parseInt(productQtys[i].value) || 1
-                            });
-                        }
-                    }
-
-                    if (!comboName || isNaN(comboPrice) || comboItemsList.length === 0) {
-                        alert("ദയവായി കോംബോ വിവരങ്ങൾ നൽകുക!");
-                        return;
-                    }
-
-                    await addDoc(collection(db, "combos"), {
-                        name: comboName,
-                        price: comboPrice,
-                        items: comboItemsList,
-                        type: "combo",
-                        timestamp: new Date()
-                    });
-
-                    alert("പുതിയ കോംബോ ഓഫർ ഫയർബേസിൽ സേവ് ചെയ്തു!");
-                    document.getElementById('combo-name').value = '';
-                    document.getElementById('combo-price').value = '';
-                }
-            } catch (error) {
-                alert("ഫയർബേസ് എറർ: " + error.message);
-            }
-        }
-
-        // ബില്ല് പ്രിന്റ് ചെയ്യാനും ഒപ്പം ഫയർബേസിലേക്ക് സേവ് ചെയ്യാനും
-        window.printAndSaveBill = async function() {
-            if(currentCart.length === 0) {
-                alert("കാർട്ട് ശൂന്യമാണ്!");
+            if(snapshot.empty) {
+                body.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-slate-400">ബില്ലുകൾ ഒന്നും കണ്ടെത്തിയില്ല!</td></tr>';
                 return;
             }
 
-            const totalAmount = parseFloat(document.getElementById('cart-total').innerText);
-            const billData = {
-                items: currentCart,
-                total: totalAmount,
-                timestamp: new Date()
-            };
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const date = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'No Date';
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                
+                tr.innerHTML = `
+                    <td class="p-4 font-mono font-bold text-slate-700">#${doc.id.substring(0,6).toUpperCase()}</td>
+                    <td class="p-4 text-slate-500">${date}</td>
+                    <td class="p-4 font-mono font-bold text-emerald-600">₹${data.total.toFixed(2)}</td>
+                    <td class="p-4 text-right">
+                        <button class="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg font-bold cursor-pointer transition">Re-Print</button>
+                    </td>
+                `;
 
-            try {
-                // 1. ഫയർബേസിലേക്ക് ബില്ല് സേവ് ചെയ്യുന്നു
-                await addDoc(collection(db, "bills"), billData);
-                
-                // 2. പ്രിന്റ് വിൻഡോ ഓപ്പൺ ചെയ്യുന്നു (നിങ്ങളുടെ ബ്ലൂടൂത്ത്/വൈഫൈ പ്രിന്റർ ഇവിടെ ലിസ്റ്റിൽ കാണാം)
-                window.print();
-                
-                alert("ബില്ല് പ്രിന്റ് ചെയ്യുകയും ഫയർബേസിൽ സുരക്ഷിതമായി സേവ് ചെയ്യുകയും ചെയ്തിരിക്കുന്നു!");
-                currentCart = [];
-                updateCartUI();
-                document.getElementById('cart-table-body').innerHTML = `<tr id="empty-row"><td colspan="3" style="text-align: center; color: #888;">Cart is empty</td></tr>`;
-            } catch (error) {
-                console.error("Error saving bill: ", error);
-                window.print(); // നെറ്റ് ഇല്ലെങ്കിലും പ്രിന്റ് നടക്കും
-            }
+                // Re-print ബട്ടൺ അമർത്തുമ്പോൾ പഴയ ബില്ല് പ്രിന്റ് ചെയ്യാനുള്ള ഫംഗ്ഷൻ
+                tr.querySelector('button').addEventListener('click', () => {
+                    window.printOldInvoice(data);
+                });
+
+                body.appendChild(tr);
+            });
+        });
+
+        // WINDOW CATEGORY SWAPPING
+        window.switchCategoryTab = function(tabName) {
+            window.currentActiveTab = tabName;
+            ['products', 'packing', 'combos'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                btn.className = (t === tabName) ? 
+                    "flex-1 py-2 text-xs font-bold rounded-lg bg-white text-blue-600 shadow-sm cursor-pointer" : 
+                    "flex-1 py-2 text-xs font-bold rounded-lg text-slate-600 hover:bg-white/50 cursor-pointer";
+            });
+            renderBillingProductsList();
         }
 
-        // ഫയർബേസിൽ നിന്ന് പഴയ ബില്ലുകൾ ലിസ്റ്റ് ചെയ്യാൻ
-        window.loadRecentBills = async function() {
-            const tbody = document.getElementById('recent-bills-table-body');
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">ബില്ലുകൾ ലോഡ് ചെയ്യുന്നു...</td></tr>';
+        // RENDER PRODUCTS
+        window.renderBillingProductsList = function() {
+            const container = document.getElementById('productsListView');
+            container.innerHTML = "";
+            const filtered = window.productsDatabase.filter(p => p.category === window.currentActiveTab);
 
-            try {
-                const q = query(collection(db, "bills"), orderBy("timestamp", "desc"));
-                const querySnapshot = await getDocs(q);
-                tbody.innerHTML = '';
+            if(filtered.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 text-xs py-8">ഈ കാറ്റഗറിയിൽ സാധനങ്ങൾ ഇല്ല.</p>`;
+                return;
+            }
 
-                if(querySnapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">ബില്ലുകൾ ഒന്നും കണ്ടെത്തിയില്ല!</td></tr>';
-                    return;
+            filtered.forEach((product, idx) => {
+                const row = document.createElement('div');
+                row.className = "flex flex-col p-3 bg-white border border-slate-100 hover:border-blue-500 rounded-xl cursor-pointer transition px-4 shadow-2xs";
+                
+                let initialImg = product.image || "https://picsum.photos/200";
+                let variantSelector = '';
+                let finalPriceDisplay = `₹${product.price}`;
+                let onClickAction = `addToCart('${product.name}', ${product.price})`;
+                let initialDesc = "";
+
+                if(product.hasVariants && product.variants.length > 0) {
+                    const selectId = `select-variant-${idx}`;
+                    variantSelector = `<select id="${selectId}" onchange="updateLiveRowData(this, ${idx})" onclick="event.stopPropagation()" class="bg-slate-50 border border-slate-200 rounded-lg p-1 text-[11px] font-bold text-slate-700 focus:outline-none">`;
+                    product.variants.forEach((v, vIdx) => {
+                        variantSelector += `<option value="${v.price}" data-index="${vIdx}">${v.name}</option>`;
+                    });
+                    variantSelector += `</select>`;
+                    
+                    finalPriceDisplay = `₹${product.variants[0].price}`;
+                    initialImg = product.variants[0].image || product.image;
+                    initialDesc = product.variants[0].desc || "";
+                    onClickAction = `addVariantToCartFromRow(${idx}, '${selectId}')`;
+                } else {
+                    variantSelector = `<span class="text-slate-300 text-xs">— Standard —</span>`;
                 }
 
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const date = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'No Date';
-                    
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>#${doc.id.substring(0,6)}</td>
-                        <td>${date}</td>
-                        <td>₹${data.total.toFixed(2)}</td>
-                        <td><button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">Re-Print</button></td>
-                    `;
-                    
-                    // പഴയ ബില്ലിന്റെ Re-Print ക്ലിക്ക് ചെയ്യുമ്പോൾ
-                    tr.querySelector('button').addEventListener('click', function() {
-                        currentCart = data.items;
-                        updateCartUI();
-                        switchTab('billing');
-                        setTimeout(() => { window.print(); }, 500);
-                    });
+                row.setAttribute('onclick', onClickAction);
+                row.id = `product-row-${idx}`;
 
-                    tbody.appendChild(tr);
+                row.innerHTML = `
+                    <div class="flex items-center justify-between w-full">
+                        <div class="w-12 shrink-0"><img id="billing-img-${idx}" src="${initialImg}" class="w-10 h-10 object-cover rounded-lg border bg-slate-50"></div>
+                        <div class="flex-1 min-w-0 pr-2 pl-3">
+                            <p class="font-semibold text-slate-700 text-xs md:text-sm truncate">${product.name}</p>
+                            <p id="billing-desc-${idx}" class="text-[11px] text-slate-400 font-medium truncate mt-0.5">${initialDesc}</p>
+                        </div>
+                        <div class="w-44 text-center shrink-0">${variantSelector}</div>
+                        <div class="w-20 text-center shrink-0"><span class="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold">HP-${product.id}</span></div>
+                        <div class="w-20 text-right shrink-0"><span id="price-display-${idx}" class="text-blue-600 font-bold text-xs md:text-sm">${finalPriceDisplay}</span></div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        window.updateLiveRowData = function(selectEl, rowIdx) {
+            const selectedOpt = selectEl.options[selectEl.selectedIndex];
+            const vIdx = parseInt(selectedOpt.getAttribute('data-index'));
+            const price = parseFloat(selectEl.value);
+            const product = window.productsDatabase.filter(p => p.category === window.currentActiveTab)[rowIdx];
+            const variantData = product.variants[vIdx];
+
+            document.getElementById(`price-display-${rowIdx}`).innerText = `₹${price}`;
+            document.getElementById(`billing-img-${rowIdx}`).src = variantData.image || product.image;
+            document.getElementById(`billing-desc-${rowIdx}`).innerText = variantData.desc || "";
+            document.getElementById(`product-row-${rowIdx}`).setAttribute('onclick', `addToCart('${product.name} (${variantData.name})', ${price})`);
+        }
+
+        window.addVariantToCartFromRow = function(rowIdx, selectId) {
+            const dropdown = document.getElementById(selectId);
+            const price = parseFloat(dropdown.value);
+            const optText = dropdown.options[dropdown.selectedIndex].text;
+            const product = window.productsDatabase.filter(p => p.category === window.currentActiveTab)[rowIdx];
+            window.addToCart(`${product.name} (${optText})`, price);
+        }
+
+        // SAVE & UPDATE DATA
+        window.adminSaveProduct = async function() {
+            const name = document.getElementById('adminPName').value.trim();
+            const category = document.getElementById('adminPCategory').value;
+            const image = document.getElementById('adminPImage').value.trim() || "https://picsum.photos/200";
+
+            if(!name) { alert("தயவுசெய்து പേര് നൽകുക!"); return; }
+            let builtProduct = { name: name, category: category, image: image };
+
+            if(category === 'combos') {
+                const o1N = document.getElementById('vOpt1Name').value;
+                const o1P = parseFloat(document.getElementById('vOpt1Price').value);
+                const o1I = document.getElementById('vOpt1Img').value.trim();
+                const o1D = document.getElementById('vOpt1Desc').value.trim();
+                const o2N = document.getElementById('vOpt2Name').value;
+                const o2P = parseFloat(document.getElementById('vOpt2Price').value);
+                const o2I = document.getElementById('vOpt2Img').value.trim();
+                const o2D = document.getElementById('vOpt2Desc').value.trim();
+
+                if(isNaN(o1P) || isNaN(o2P)) { alert("വിലകൾ കൃത്യമായി നൽകുക!"); return; }
+                builtProduct.hasVariants = true;
+                builtProduct.variants = [{ name: o1N, price: o1P, image: o1I, desc: o1D }, { name: o2N, price: o2P, image: o2I, desc: o2D }];
+            } else {
+                const price = parseFloat(document.getElementById('adminPPrice').value);
+                if(isNaN(price)) { alert("ശരിയായ വില നൽകുക!"); return; }
+                builtProduct.price = price;
+                builtProduct.hasVariants = false;
+                builtProduct.variants = [];
+            }
+
+            try {
+                if(window.isEditMode) {
+                    const editId = document.getElementById('editProductId').value;
+                    await setDoc(doc(db, "products", editId), builtProduct);
+                    alert("ക്ലൗഡിൽ വിവരങ്ങൾ എഡിറ്റ് ചെയ്ത് സേവ് ചെയ്തിരിക്കുന്നു!");
+                } else {
+                    let customId = (1001 + window.productsDatabase.length).toString();
+                    await setDoc(doc(db, "products", customId), builtProduct);
+                    alert("പുതിയ പ്രൊഡക്റ്റ് ക്ലൗഡിലേക്ക് വിജയകരമായി ചേർത്തു!");
+                }
+            } catch(e) {
+                alert("ഡാറ്റ ക്ലൗഡിൽ സേവ് ചെയ്യാൻ പറ്റിയില്ല: " + e.message);
+            }
+            resetAdminForm();
+        }
+
+        window.renderAdminInventoryTable = function() {
+            const body = document.getElementById('adminInventoryTableBody');
+            body.innerHTML = "";
+
+            window.productsDatabase.forEach((product, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-100 text-xs hover:bg-slate-50/50";
+                const svgId = `barcode-svg-admin-${idx}`;
+                const imgTag = product.image ? `<img src="${product.image}" class="w-8 h-8 object-cover rounded border">` : `<span class="material-icons text-slate-300">image</span>`;
+                
+                let detailColumnHTML = '';
+                let printPrice = product.price || 0;
+                
+                if(product.hasVariants) {
+                    product.variants.forEach(v => { 
+                        detailColumnHTML += `<div class="mb-1 text-[11px] bg-slate-50 p-1 rounded border border-slate-100">
+                            <b>${v.name}</b>: ₹${v.price}<br><span class="text-slate-400 text-[10px]">${v.desc || 'No Description'}</span>
+                        </div>`; 
+                    });
+                    printPrice = product.variants[0].price;
+                } else {
+                    detailColumnHTML = `<span class="font-mono text-slate-700">₹${product.price.toFixed(2)}</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="py-2.5 pl-2">${imgTag}</td>
+                    <td class="py-2.5 font-bold text-slate-800">${product.name}</td>
+                    <td class="py-2.5 uppercase text-[10px] font-bold text-blue-600">${product.category}</td>
+                    <td class="py-2.5">${detailColumnHTML}</td>
+                    <td class="py-1 flex justify-center"><svg id="${svgId}"></svg></td>
+                    <td class="py-2.5 text-right pr-4 space-x-1">
+                        <button onclick="loadProductToEditForm('${product.id}')" class="bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-500 hover:text-white px-2 py-1 rounded-md font-bold cursor-pointer transition">Edit</button>
+                        <button onclick="printSingleBarcode('${product.name}', ${printPrice}, 'HP-${product.id}')" class="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white px-2 py-1 rounded-md font-bold cursor-pointer transition inline-flex items-center gap-0.5"><span class="material-icons text-xs">print</span> Print</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+                JsBarcode(`#${svgId}`, `HP-${product.id}`, { format: "CODE128", width: 1.1, height: 22, displayValue: true, fontSize: 8 });
+            });
+        }
+
+        window.loadProductToEditForm = function(id) {
+            const p = window.productsDatabase.find(item => item.id === id);
+            if(!p) return;
+
+            window.isEditMode = true;
+            document.getElementById('editProductId').value = p.id;
+            document.getElementById('formTitle').innerHTML = `<span class="material-icons text-amber-500 text-lg">edit</span> പ്രൊഡക്റ്റ് എഡിറ്റ് ചെയ്യുന്നു (ID: HP-${p.id})`;
+            document.getElementById('cancelEditFormBtn').classList.remove('hidden');
+            document.getElementById('adminPName').value = p.name;
+            document.getElementById('adminPCategory').value = p.category;
+            document.getElementById('adminPImage').value = p.image || "";
+
+            toggleAdminVariantFields();
+
+            if(p.hasVariants) {
+                if(p.variants[0]) {
+                    document.getElementById('vOpt1Name').value = p.variants[0].name || "";
+                    document.getElementById('vOpt1Price').value = p.variants[0].price || "";
+                    document.getElementById('vOpt1Img').value = p.variants[0].image || "";
+                    document.getElementById('vOpt1Desc').value = p.variants[0].desc || "";
+                }
+                if(p.variants[1]) {
+                    document.getElementById('vOpt2Name').value = p.variants[1].name || "";
+                    document.getElementById('vOpt2Price').value = p.variants[1].price || "";
+                    document.getElementById('vOpt2Img').value = p.variants[1].image || "";
+                    document.getElementById('vOpt2Desc').value = p.variants[1].desc || "";
+                }
+            } else {
+                document.getElementById('adminPPrice').value = p.price || "";
+            }
+            document.getElementById('adminView').scrollTop = 0;
+        }
+
+        // ബില്ലുകൾ ക്ലൗഡിലേക്ക് അപ്‌ലോഡ് ചെയ്യാനുള്ള ഫംഗ്ഷൻ
+        window.saveBillToCloud = async function(cartData, finalTotal) {
+            try {
+                await addDoc(billsRef, {
+                    items: cartData,
+                    total: finalTotal,
+                    timestamp: new Date()
                 });
-            } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">ബില്ലുകൾ ലോഡ് ചെയ്യാൻ പറ്റിയില്ല: ' + error.message + '</td></tr>';
+            } catch (err) {
+                console.error("ബില്ല് ക്ലൗഡിൽ സേവ് ചെയ്യാൻ സാധിച്ചില്ല: ", err);
             }
         }
     </script>
+
+    <script>
+        function toggleCameraScanner() {
+            const scannerDiv = document.getElementById('scannerContainer');
+            if(scannerDiv.classList.contains('hidden')) {
+                scannerDiv.classList.remove('hidden');
+                startLiveCameraScan();
+            } else {
+                scannerDiv.classList.add('hidden');
+                if(window.html5QrcodeScanner) {
+                    window.html5QrcodeScanner.stop().catch(err => console.log(err));
+                }
+            }
+        }
+
+        function startLiveCameraScan() {
+            window.html5QrcodeScanner = new Html5Qrcode("interactiveScannerView");
+            const config = { fps: 20, qrbox: { width: 280, height: 160 } };
+            
+            window.html5QrcodeScanner.start(
+                { facingMode: "environment" }, 
+                config,
+                (decodedText) => {
+                    processScannedCodeInput(decodedText);
+                    toggleCameraScanner(); 
+                },
+                (errorMessage) => {}
+            ).catch(err => alert("ക്യാമറ ഓപ്പൺ ചെയ്യാൻ അനുവാദം നൽകുക!"));
+        }
+
+        // ക്യാമറയിൽ നിന്നും ഇൻപുട്ടിൽ നിന്നും വരുന്ന ബാർകോഡ് പ്രൊസസ്സ് ചെയ്യുന്ന ഭാഗം
+        function processScannedCodeInput(codeValue) {
+            if(!codeValue) return;
+            const cleaned = codeValue.trim().toUpperCase();
+            
+            // HP-1001 അല്ലെങ്കിൽ വെറും 1001 എന്ന് വന്നാലും കറക്റ്റ് ആയി മാച്ച് ചെയ്യാൻ വേണ്ടിയുള്ള ലോജിക്
+            const target = window.productsDatabase.find(p => {
+                const fullBarcodeId = `HP-${p.id}`.toUpperCase();
+                return fullBarcodeId === cleaned || p.id.toString().toUpperCase() === cleaned;
+            });
+
+            if(target) {
+                if(target.hasVariants && target.variants.length > 0) {
+                    addToCart(`${target.name} (${target.variants[0].name})`, target.variants[0].price);
+                } else {
+                    addToCart(target.name, target.price);
+                }
+            } else {
+                alert(`HP Barcode സിസ്റ്റത്തിൽ ഈ ഉൽപ്പന്നം കണ്ടെത്താനായില്ല: ${cleaned}`);
+            }
+        }
+
+        // ബില്ല് കംപ്ലീറ്റ് ചെയ്ത് ക്ലൗഡിലേക്ക് സേവ് ചെയ്യുകയും പ്രിന്റ് എടുക്കുകയും ചെയ്യുന്നു
+        function triggerInvoiceBillPrint() {
+            if(window.cart.length === 0) return;
+            const printArea = document.getElementById('printContent');
+            let dateStr = new Date().toLocaleString();
+            let totalAmount = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            // 1. ക്ലൗഡ് ഫയർബേസിലേക്ക് ആദ്യം ബില്ല് സേവ് ചെയ്യുന്നു
+            window.saveBillToCloud(window.cart, totalAmount);
+
+            // 2. പ്രിന്റിംഗ് ലേഔട്ട് നിർമ്മിക്കുന്നു
+            let billHTML = `
+                <div style="text-align: center; font-family: monospace; max-width: 80mm; font-size:12px; color:#000; padding:5px;">
+                    <h3 style="margin:0; font-size:16px; font-weight:bold;">HEAVEN PEACE</h3>
+                    <p style="margin:2px 0;">Wholesale & Custom Gifts Store</p>
+                    <p style="margin:2px 0;">Date: ${dateStr}</p>
+                    <hr style="border-top:1px dashed #000; margin:8px 0;">
+                    <table style="width:100%; text-align:left; font-size:11px; border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom:1px dashed #000;">
+                                <th style="padding-bottom:4px;">Item</th>
+                                <th style="text-align:center; padding-bottom:4px;">Qty</th>
+                                <th style="text-align:right; padding-bottom:4px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            window.cart.forEach(item => {
+                billHTML += `
+                    <tr>
+                        <td style="padding:3px 0;">${item.name}</td>
+                        <td style="text-align:center; padding:3px 0;">${item.qty}</td>
+                        <td style="text-align:right; padding:3px 0;">₹${(item.price * item.qty).toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            billHTML += `
+                        </tbody>
+                    </table>
+                    <hr style="border-top:1px dashed #000; margin:8px 0;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:13px;">
+                        <span>Grand Total:</span>
+                        <span>₹${totalAmount.toFixed(2)}</span>
+                    </div>
+                    <hr style="border-top:1px dashed #000; margin:8px 0;">
+                    <p style="margin-top:5px; font-weight:bold;">Thank you for shopping!</p>
+                </div>
+            `;
+
+            printArea.innerHTML = billHTML;
+            window.print();
+            clearCart();
+        }
+
+        // പഴയ ബില്ലുകൾ റീ-പ്രിന്റ് ചെയ്യാനുള്ള ഫംഗ്ഷൻ
+        window.printOldInvoice = function(billData) {
+            const printArea = document.getElementById('printContent');
+            let dateStr = billData.timestamp ? billData.timestamp.toDate().toLocaleString() : new Date().toLocaleString();
+
+            let billHTML = `
+                <div style="text-align: center; font-family: monospace; max-width: 80mm; font-size:12px; color:#000; padding:5px;">
+                    <h3 style="margin:0; font-size:16px; font-weight:bold;">HEAVEN PEACE</h3>
+                    <p style="margin:2px 0; font-weight:bold;">[ DUPLICATE BILL ]</p>
+                    <p style="margin:2px 0;">Date: ${dateStr}</p>
+                    <hr style="border-top:1px dashed #000; margin:8px 0;">
+                    <table style="width:100%; text-align:left; font-size:11px; border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom:1px dashed #000;">
+                                <th style="padding-bottom:4px;">Item</th>
+                                <th style="text-align:center; padding-bottom:4px;">Qty</th>
+                                <th style="text-align:right; padding-bottom:4px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            billData.items.forEach(item => {
+                billHTML += `
+                    <tr>
+                        <td style="padding:3px 0;">${item.name}</td>
+                        <td style="text-align:center; padding:3px 0;">${item.qty}</td>
+                        <td style="text-align:right; padding:3px 0;">₹${(item.price * item.qty).toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            billHTML += `
+                        </tbody>
+                    </table>
+                    <hr style="border-top:1px dashed #000; margin:8px 0;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:13px;">
+                        <span>Grand Total:</span>
+                        <span>₹${billData.total.toFixed(2)}</span>
+                    </div>
+                    <hr style="border-top:1px dashed #000; margin:8px 0;">
+                </div>
+            `;
+
+            printArea.innerHTML = billHTML;
+            window.print();
+        }
+
+        function printSingleBarcode(name, price, barcodeVal) {
+            const printArea = document.getElementById('printContent');
+            printArea.innerHTML = `
+                <div style="font-family: monospace; padding: 10px; text-align: center; color:#000;">
+                    <h2 style="font-size: 13px; font-weight: bold; margin: 0;">${name}</h2>
+                    <p style="font-size: 11px; margin: 3px 0;">Price: ₹${price.toFixed(2)}</p>
+                    <div style="display:flex; justify-content:center;"><svg id="labelBarcodeTarget"></svg></div>
+                </div>
+            `;
+            JsBarcode("#labelBarcodeTarget", barcodeVal, { format: "CODE128", width: 2, height: 45, displayValue: true, fontSize: 11 });
+            window.print();
+        }
+
+        // GENERAL INTERFACE NAVIGATION
+        function toggleAdminVariantFields() {
+            const cat = document.getElementById('adminPCategory').value;
+            if(cat === 'combos') {
+                document.getElementById('variantPriceArea').classList.remove('hidden');
+                document.getElementById('singlePriceArea').classList.add('hidden');
+            } else {
+                document.getElementById('variantPriceArea').classList.add('hidden');
+                document.getElementById('singlePriceArea').classList.remove('hidden');
+            }
+        }
+        function resetAdminForm() {
+            window.isEditMode = false;
+            document.getElementById('editProductId').value = "";
+            document.getElementById('formTitle').innerHTML = `<span class="material-icons text-blue-500 text-lg">add_box</span> പുതിയ പ്രൊഡക്റ്റ് / കോംബോ ചേർക്കുക`;
+            document.getElementById('cancelEditFormBtn').classList.add('hidden');
+            document.getElementById('adminPName').value = "";
+            document.getElementById('adminPPrice').value = "";
+            document.getElementById('adminPImage').value = "";
+            document.getElementById('vOpt1Price').value = ""; document.getElementById('vOpt1Img').value = ""; document.getElementById('vOpt1Desc').value = "";
+            document.getElementById('vOpt2Price').value = ""; document.getElementById('vOpt2Img').value = ""; document.getElementById('vOpt2Desc').value = "";
+            toggleAdminVariantFields();
+        }
+        function toggleMenu() { document.getElementById('sideMenu').classList.toggle('-translate-x-full'); }
+        function toggleMobileCart(open) {
+            const sheet = document.getElementById('cartSection');
+            const overlay = document.getElementById('cartSheetOverlay');
+            if(open) { sheet.classList.remove('translate-y-full'); overlay.classList.remove('hidden'); } 
+            else { sheet.classList.add('translate-y-full'); overlay.classList.add('hidden'); }
+        }
+        function switchView(viewId) {
+            document.getElementById('billingView').classList.add('hidden');
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('recentView').classList.add('hidden');
+            
+            if(viewId === 'billing') document.getElementById('billingView').classList.remove('hidden');
+            else if(viewId === 'admin') document.getElementById('adminView').classList.remove('hidden');
+            else if(viewId === 'recent') document.getElementById('recentView').classList.remove('hidden');
+            toggleMenu();
+        }
+        function checkAdminAccess(targetView) { if (window.isAdminLoggedIn) switchView(targetView); else { toggleMenu(); openLoginModal(); } }
+        function openLoginModal() {
+            if(window.isAdminLoggedIn) {
+                window.isAdminLoggedIn = false;
+                document.getElementById('roleBadge').innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> EMPLOYEE ACCESS`;
+                document.getElementById('loginLogoutBtn').innerText = "Admin Login";
+                switchView('billing');
+            } else { document.getElementById('loginModal').classList.remove('hidden'); }
+        }
+        function closeLoginModal() { document.getElementById('loginModal').classList.add('hidden'); }
+        function attemptLogin() {
+            if(document.getElementById('usernameInput').value === 'admin' && document.getElementById('passwordInput').value === '1234') {
+                window.isAdminLoggedIn = true;
+                document.getElementById('roleBadge').innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></span> ADMIN MODE`;
+                document.getElementById('loginLogoutBtn').innerText = "Admin Logout";
+                closeLoginModal(); switchView('admin');
+            } else { document.getElementById('loginError').classList.remove('hidden'); }
+        }
+        function addToCart(name, price) {
+            const existingItem = window.cart.find(item => item.name === name);
+            if(existingItem) existingItem.qty += 1; else window.cart.push({ name: name, price: price, qty: 1 });
+            renderCart();
+        }
+        function changeQty(index, amount) {
+            window.cart[index].qty += amount;
+            if(window.cart[index].qty <= 0) window.cart.splice(index, 1);
+            renderCart();
+        }
+        function clearCart() { window.cart = []; renderCart(); }
+        function renderCart() {
+            const cartList = document.getElementById('cartList');
+            const emptyText = document.getElementById('emptyCartText');
+            document.querySelectorAll('.invoice-row').forEach(el => el.remove());
+
+            if(window.cart.length === 0) { emptyText.classList.remove('hidden'); updateTotal(); toggleMobileCart(false); return; }
+            emptyText.classList.add('hidden');
+
+            window.cart.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = 'invoice-row flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100';
+                row.innerHTML = `
+                    <div class="max-w-[55%]"><p class="font-bold text-slate-700 text-xs truncate">${item.name}</p><p class="font-mono text-[11px] text-slate-400">₹${item.price} × ${item.qty}</p></div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center bg-white border border-slate-200 rounded-lg overflow-hidden h-7">
+                            <button onclick="changeQty(${index}, -1)" class="w-7 text-slate-500 font-bold hover:bg-slate-100 h-full">-</button>
+                            <span class="font-mono font-bold text-xs px-1.5 text-slate-700 bg-slate-50 h-full flex items-center justify-center min-w-5">${item.qty}</span>
+                            <button onclick="changeQty(${index}, 1)" class="w-7 text-slate-500 font-bold hover:bg-slate-100 h-full">+</button>
+                        </div>
+                        <span class="font-mono font-bold text-xs text-slate-700 min-w-14 text-right">₹${(item.price * item.qty)}</span>
+                    </div>
+                `;
+                cartList.appendChild(row);
+            });
+            updateTotal();
+        }
+        function updateTotal() {
+            let subtotal = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            document.getElementById('subtotalPrice').innerText = '₹' + subtotal.toFixed(2);
+            document.getElementById('totalPrice').innerText = '₹' + subtotal.toFixed(2);
+            document.getElementById('mobileCartCount').innerText = window.cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('mobileCartTotal').innerText = '₹' + subtotal.toFixed(2);
+        }
+        function handleBarcode(e) { if(e.key === 'Enter') { processScannedCodeInput(e.target.value); e.target.value = ''; } }
+    </script>
+
+    <style>
+        @media print {
+            body * { display: none !important; }
+            #printSection, #printSection * { display: block !important; }
+            #printSection { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
 </body>
 </html>
