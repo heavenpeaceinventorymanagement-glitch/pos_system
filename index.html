@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Heaven Peace Premium Cloud POS v7</title>
+    <title>Heaven Peace Premium Cloud POS v8</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
@@ -78,7 +78,7 @@
                 <div id="scannerContainer" class="hidden bg-slate-900 border rounded-2xl p-3 mb-3 relative max-w-md mx-auto w-full">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs text-emerald-400 font-bold flex items-center gap-1 animate-pulse">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live Scanner Active
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Scanner Engine Active
                         </span>
                         <button onclick="toggleCameraScanner()" class="text-slate-400 hover:text-white text-xs font-bold">CLOSE</button>
                     </div>
@@ -114,11 +114,17 @@
 
             <div id="cartSheetOverlay" onclick="toggleMobileCart(false)" class="hidden fixed inset-0 bg-black/40 z-30 lg:hidden"></div>
             
-            <div id="cartSection" class="fixed bottom-0 left-0 right-0 max-h-[85vh] lg:max-h-none rounded-t-3xl lg:rounded-t-none lg:static bg-white lg:w-96 rounded-2xl border border-slate-200 shadow-2xl lg:shadow-sm flex flex-col h-full overflow-hidden z-30 lg:z-0 transition-transform duration-300 lg:translate-y-0 translate-y-full lg:block">
+            <div id="cartSection" class="fixed bottom-0 left-0 right-0 max-h-[90vh] lg:max-h-none rounded-t-3xl lg:rounded-t-none lg:static bg-white lg:w-96 rounded-2xl border border-slate-200 shadow-2xl lg:shadow-sm flex flex-col h-full overflow-hidden z-30 lg:z-0 transition-transform duration-300 lg:translate-y-0 translate-y-full lg:block">
                 <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto my-2.5 lg:hidden"></div>
+                
                 <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center shrink-0">
                     <span class="font-bold text-slate-700 text-xs tracking-wide">CURRENT ORDER</span>
                     <button onclick="clearCart()" class="text-red-500 text-xs font-bold px-2 py-1 rounded-lg hover:bg-red-50">CLEAR ALL</button>
+                </div>
+
+                <div class="p-3 bg-blue-50/50 border-b border-slate-100 grid grid-cols-2 gap-2 shrink-0">
+                    <input type="text" id="customerName" placeholder="Customer Name" class="bg-white border rounded-lg p-2 text-xs focus:outline-none focus:border-blue-500">
+                    <input type="tel" id="customerPhone" placeholder="Phone Number" class="bg-white border rounded-lg p-2 text-xs focus:outline-none focus:border-blue-500">
                 </div>
                 
                 <div id="cartList" class="flex-1 overflow-y-auto p-4 space-y-2.5 content-start">
@@ -129,7 +135,15 @@
                 </div>
 
                 <div class="p-4 border-t border-slate-100 bg-slate-50 space-y-3 shrink-0 pb-6 lg:pb-4">
-                    <div class="flex justify-between text-xs font-medium text-slate-500">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-500">Print Paper Size:</span>
+                        <select id="invoicePrintSize" class="bg-white border rounded-lg p-1.5 font-bold text-slate-700 focus:outline-none text-xs">
+                            <option value="3inch">3 Inch Thermal (80mm)</option>
+                            <option value="2inch">2 Inch Thermal (58mm)</option>
+                            <option value="4x6">4 × 6 Label Sheet</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-between text-xs font-medium text-slate-500 pt-1">
                         <span>Subtotal</span>
                         <span id="subtotalPrice" class="font-mono text-slate-700 font-bold">₹0.00</span>
                     </div>
@@ -148,10 +162,11 @@
             <h2 class="text-xl font-bold text-slate-800 border-b pb-3 border-slate-200">Recent Bills (അവസാനമായി ചെയ്ത ബില്ലുകൾ)</h2>
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[600px]">
+                    <table class="w-full text-left border-collapse min-w-[650px]">
                         <thead>
                             <tr class="text-slate-400 text-xs font-bold uppercase border-b border-slate-100 bg-slate-50">
                                 <th class="p-4">Bill ID</th>
+                                <th class="p-4">Customer Info</th>
                                 <th class="p-4">Date & Time</th>
                                 <th class="p-4">Total Amount</th>
                                 <th class="p-4 text-right">Action</th>
@@ -159,7 +174,7 @@
                         </thead>
                         <tbody id="recentBillsTableBody" class="text-slate-600 text-xs font-medium divide-y divide-slate-100">
                             <tr>
-                                <td colspan="4" class="text-center py-8 text-slate-400">ബില്ലുകൾ ഒന്നും ലഭ്യമല്ല.</td>
+                                <td colspan="5" class="text-center py-8 text-slate-400">ബില്ലുകൾ ഒന്നും ലഭ്യമല്ല.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -229,19 +244,23 @@
             </div>
 
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-4 bg-slate-50 border-b border-slate-100">
+                <div class="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
                     <h3 class="font-bold text-slate-700 text-sm">Cloud Realtime Database</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                        <span class="text-[11px] text-slate-400 font-bold uppercase">Live Config</span>
+                    </div>
                 </div>
                 <div class="p-2 md:p-4 overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[750px]">
+                    <table class="w-full text-left border-collapse min-w-[850px]">
                         <thead>
                             <tr class="text-slate-400 text-xs font-bold uppercase border-b border-slate-100">
                                 <th class="pb-3 pl-2">Photo</th>
                                 <th class="pb-3">Product Name</th>
                                 <th class="pb-3">Category</th>
-                                <th class="pb-3 w-48">Details</th>
-                                <th class="pb-3 text-center">Barcode</th>
-                                <th class="pb-3 text-right pr-4">Actions</th>
+                                <th class="pb-3 w-40">Details</th>
+                                <th class="pb-3 text-center">Barcode Target</th>
+                                <th class="pb-3 text-right pr-4">Actions Setup</th>
                             </tr>
                         </thead>
                         <tbody id="adminInventoryTableBody" class="text-slate-600 text-xs font-medium"></tbody>
@@ -268,34 +287,29 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // നിങ്ങളുടെ കറക്റ്റ് ആയ ഒറിജിനൽ ഫയർബേസ് വിവരങ്ങൾ
         const firebaseConfig = {
             apiKey: "AIzaSyCZQrqEz8UElnroPDqIEGEUc7YL0qZzi7A",
             authDomain: "heaven-peace-pos.firebaseapp.com",
             projectId: "heaven-peace-pos",
             storageBucket: "heaven-peace-pos.firebasestorage.app",
             messagingSenderId: "959112672379",
-            appId: "1:959112672379:web:8e91b2b2afcaf150385ede",
-            measurementId: "G-8R5X4NH6RJ"
+            appId: "1:959112672379:web:8e91b2b2afcaf150385ede"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const productsRef = collection(db, "products");
-        const billsRef = collection(db, "bills"); // ബില്ലുകൾക്കുള്ള റെഫറൻസ്
+        const billsRef = collection(db, "bills");
 
-        // GLOBAL ENGINE STATE
         window.productsDatabase = [];
         window.currentActiveTab = 'products';
         window.cart = [];
         window.isAdminLoggedIn = false;
         window.isEditMode = false;
-        let html5QrcodeScanner = null;
 
-        // REALTIME CLOUD PRODUCTS LISTENER
+        // REALTIME PRODUCTS LISTENER
         onSnapshot(productsRef, (snapshot) => {
             window.productsDatabase = [];
             snapshot.forEach((doc) => {
@@ -307,138 +321,64 @@
             renderAdminInventoryTable();
         });
 
-        // REALTIME CLOUD BILLS LISTENER (Recent Bills നിരന്തരം അപ്ഡേറ്റ് ചെയ്യാൻ)
+        // REALTIME BILLS LISTENER
         const qBills = query(billsRef, orderBy("timestamp", "desc"));
         onSnapshot(qBills, (snapshot) => {
             const body = document.getElementById('recentBillsTableBody');
             body.innerHTML = "";
-            
             if(snapshot.empty) {
-                body.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-slate-400">ബില്ലുകൾ ഒന്നും കണ്ടെത്തിയില്ല!</td></tr>';
+                body.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400">ബില്ലുകൾ ഒന്നും ലഭ്യമല്ല.</td></tr>';
                 return;
             }
-
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 const date = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'No Date';
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
+                const custName = data.customerName || "Walk-in";
+                const custPhone = data.customerPhone || "N/A";
                 
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
                 tr.innerHTML = `
                     <td class="p-4 font-mono font-bold text-slate-700">#${doc.id.substring(0,6).toUpperCase()}</td>
+                    <td class="p-4 text-slate-700 font-semibold">${custName} <span class="text-slate-400 block text-[10px] font-normal">${custPhone}</span></td>
                     <td class="p-4 text-slate-500">${date}</td>
                     <td class="p-4 font-mono font-bold text-emerald-600">₹${data.total.toFixed(2)}</td>
                     <td class="p-4 text-right">
                         <button class="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg font-bold cursor-pointer transition">Re-Print</button>
                     </td>
                 `;
-
-                // Re-print ബട്ടൺ അമർത്തുമ്പോൾ പഴയ ബില്ല് പ്രിന്റ് ചെയ്യാനുള്ള ഫംഗ്ഷൻ
-                tr.querySelector('button').addEventListener('click', () => {
-                    window.printOldInvoice(data);
-                });
-
+                tr.querySelector('button').addEventListener('click', () => { window.printOldInvoice(data); });
                 body.appendChild(tr);
             });
         });
 
-        // WINDOW CATEGORY SWAPPING
-        window.switchCategoryTab = function(tabName) {
-            window.currentActiveTab = tabName;
-            ['products', 'packing', 'combos'].forEach(t => {
-                const btn = document.getElementById(`tab-${t}`);
-                btn.className = (t === tabName) ? 
-                    "flex-1 py-2 text-xs font-bold rounded-lg bg-white text-blue-600 shadow-sm cursor-pointer" : 
-                    "flex-1 py-2 text-xs font-bold rounded-lg text-slate-600 hover:bg-white/50 cursor-pointer";
-            });
-            renderBillingProductsList();
+        // HIDE AND DISABLE PRODUCT ACTION
+        window.toggleHideProductInCloud = async function(id, currentStatus) {
+            const newStatus = !currentStatus;
+            try {
+                await setDoc(doc(db, "products", id), { isDisabled: newStatus }, { merge: true });
+                alert(newStatus ? "ഉൽപ്പന്നം താൽക്കാലികമായി ഹൈഡ് ചെയ്തു!" : "ഉൽപ്പന്നം ഇപ്പോൾ ബില്ലിംഗിൽ ലഭ്യമാണ്!");
+            } catch(e) { alert("Error updating cloud status: " + e.message); }
         }
 
-        // RENDER PRODUCTS
-        window.renderBillingProductsList = function() {
-            const container = document.getElementById('productsListView');
-            container.innerHTML = "";
-            const filtered = window.productsDatabase.filter(p => p.category === window.currentActiveTab);
-
-            if(filtered.length === 0) {
-                container.innerHTML = `<p class="text-center text-slate-400 text-xs py-8">ഈ കാറ്റഗറിയിൽ സാധനങ്ങൾ ഇല്ല.</p>`;
-                return;
+        // PERMANENT CLOUD DELETE
+        window.deleteProductFromCloud = async function(id) {
+            if(confirm("ഈ പ്രൊഡക്റ്റ് ക്ലൗഡ് ഡാറ്റാബേസിൽ നിന്നും എന്നെന്നേക്കുമായി ഡിലീറ്റ് ചെയ്യണോ?")) {
+                try {
+                    await deleteDoc(doc(db, "products", id));
+                    alert("ഉൽപ്പന്നം പൂർണ്ണമായി ഡിലീറ്റ് ചെയ്തു!");
+                } catch(e) { alert("Error deleting: " + e.message); }
             }
-
-            filtered.forEach((product, idx) => {
-                const row = document.createElement('div');
-                row.className = "flex flex-col p-3 bg-white border border-slate-100 hover:border-blue-500 rounded-xl cursor-pointer transition px-4 shadow-2xs";
-                
-                let initialImg = product.image || "https://picsum.photos/200";
-                let variantSelector = '';
-                let finalPriceDisplay = `₹${product.price}`;
-                let onClickAction = `addToCart('${product.name}', ${product.price})`;
-                let initialDesc = "";
-
-                if(product.hasVariants && product.variants.length > 0) {
-                    const selectId = `select-variant-${idx}`;
-                    variantSelector = `<select id="${selectId}" onchange="updateLiveRowData(this, ${idx})" onclick="event.stopPropagation()" class="bg-slate-50 border border-slate-200 rounded-lg p-1 text-[11px] font-bold text-slate-700 focus:outline-none">`;
-                    product.variants.forEach((v, vIdx) => {
-                        variantSelector += `<option value="${v.price}" data-index="${vIdx}">${v.name}</option>`;
-                    });
-                    variantSelector += `</select>`;
-                    
-                    finalPriceDisplay = `₹${product.variants[0].price}`;
-                    initialImg = product.variants[0].image || product.image;
-                    initialDesc = product.variants[0].desc || "";
-                    onClickAction = `addVariantToCartFromRow(${idx}, '${selectId}')`;
-                } else {
-                    variantSelector = `<span class="text-slate-300 text-xs">— Standard —</span>`;
-                }
-
-                row.setAttribute('onclick', onClickAction);
-                row.id = `product-row-${idx}`;
-
-                row.innerHTML = `
-                    <div class="flex items-center justify-between w-full">
-                        <div class="w-12 shrink-0"><img id="billing-img-${idx}" src="${initialImg}" class="w-10 h-10 object-cover rounded-lg border bg-slate-50"></div>
-                        <div class="flex-1 min-w-0 pr-2 pl-3">
-                            <p class="font-semibold text-slate-700 text-xs md:text-sm truncate">${product.name}</p>
-                            <p id="billing-desc-${idx}" class="text-[11px] text-slate-400 font-medium truncate mt-0.5">${initialDesc}</p>
-                        </div>
-                        <div class="w-44 text-center shrink-0">${variantSelector}</div>
-                        <div class="w-20 text-center shrink-0"><span class="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold">HP-${product.id}</span></div>
-                        <div class="w-20 text-right shrink-0"><span id="price-display-${idx}" class="text-blue-600 font-bold text-xs md:text-sm">${finalPriceDisplay}</span></div>
-                    </div>
-                `;
-                container.appendChild(row);
-            });
         }
 
-        window.updateLiveRowData = function(selectEl, rowIdx) {
-            const selectedOpt = selectEl.options[selectEl.selectedIndex];
-            const vIdx = parseInt(selectedOpt.getAttribute('data-index'));
-            const price = parseFloat(selectEl.value);
-            const product = window.productsDatabase.filter(p => p.category === window.currentActiveTab)[rowIdx];
-            const variantData = product.variants[vIdx];
-
-            document.getElementById(`price-display-${rowIdx}`).innerText = `₹${price}`;
-            document.getElementById(`billing-img-${rowIdx}`).src = variantData.image || product.image;
-            document.getElementById(`billing-desc-${rowIdx}`).innerText = variantData.desc || "";
-            document.getElementById(`product-row-${rowIdx}`).setAttribute('onclick', `addToCart('${product.name} (${variantData.name})', ${price})`);
-        }
-
-        window.addVariantToCartFromRow = function(rowIdx, selectId) {
-            const dropdown = document.getElementById(selectId);
-            const price = parseFloat(dropdown.value);
-            const optText = dropdown.options[dropdown.selectedIndex].text;
-            const product = window.productsDatabase.filter(p => p.category === window.currentActiveTab)[rowIdx];
-            window.addToCart(`${product.name} (${optText})`, price);
-        }
-
-        // SAVE & UPDATE DATA
+        // SAVE & UPDATE TO CLOUD ENGINE
         window.adminSaveProduct = async function() {
             const name = document.getElementById('adminPName').value.trim();
             const category = document.getElementById('adminPCategory').value;
             const image = document.getElementById('adminPImage').value.trim() || "https://picsum.photos/200";
 
-            if(!name) { alert("தயவுசெய்து പേര് നൽകുക!"); return; }
-            let builtProduct = { name: name, category: category, image: image };
+            if(!name) { alert("దయవుசெய்து പേര് നൽകുക!"); return; }
+            let builtProduct = { name: name, category: category, image: image, isDisabled: false };
 
             if(category === 'combos') {
                 const o1N = document.getElementById('vOpt1Name').value;
@@ -464,26 +404,116 @@
             try {
                 if(window.isEditMode) {
                     const editId = document.getElementById('editProductId').value;
-                    await setDoc(doc(db, "products", editId), builtProduct);
-                    alert("ക്ലൗഡിൽ വിവരങ്ങൾ എഡിറ്റ് ചെയ്ത് സേവ് ചെയ്തിരിക്കുന്നു!");
+                    await setDoc(doc(db, "products", editId), builtProduct, { merge: true });
+                    alert("ക്ലൗഡിൽ എഡിറ്റ് ചെയ്ത് സേവ് ചെയ്തു!");
                 } else {
                     let customId = (1001 + window.productsDatabase.length).toString();
                     await setDoc(doc(db, "products", customId), builtProduct);
                     alert("പുതിയ പ്രൊഡക്റ്റ് ക്ലൗഡിലേക്ക് വിജയകരമായി ചേർത്തു!");
                 }
-            } catch(e) {
-                alert("ഡാറ്റ ക്ലൗഡിൽ സേവ് ചെയ്യാൻ പറ്റിയില്ല: " + e.message);
-            }
+            } catch(e) { alert("Error saving data: " + e.message); }
             resetAdminForm();
         }
 
-        window.renderAdminInventoryTable = function() {
+        // SAVE INVOICE RECORDS
+        window.saveBillToCloud = async function(cartData, finalTotal, name, phone) {
+            try {
+                await addDoc(billsRef, {
+                    customerName: name,
+                    customerPhone: phone,
+                    items: cartData,
+                    total: finalTotal,
+                    timestamp: new Date()
+                });
+            } catch (err) { console.error("ബില്ല് സേവ് ചെയ്യാൻ പറ്റിയില്ല: ", err); }
+        }
+    </script>
+
+    <script>
+        // RENDER BILLING PRODUCTS LIST
+        function renderBillingProductsList() {
+            const container = document.getElementById('productsListView');
+            container.innerHTML = "";
+            // isDisabled ആയിട്ടുള്ളവ ബില്ലിംഗ് സ്ക്രീനിൽ കാണിക്കില്ല
+            const filtered = window.productsDatabase.filter(p => p.category === window.currentActiveTab && !p.isDisabled);
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 text-xs py-8">ഈ കാറ്റഗറിയിൽ നിലവിൽ സാധനങ്ങൾ ഇല്ല.</p>`;
+                return;
+            }
+
+            filtered.forEach((product, idx) => {
+                const row = document.createElement('div');
+                row.className = "flex flex-col p-3 bg-white border border-slate-100 hover:border-blue-500 rounded-xl cursor-pointer transition px-4 shadow-2xs";
+                
+                let initialImg = product.image || "https://picsum.photos/200";
+                let variantSelector = '';
+                let finalPriceDisplay = `₹${product.price}`;
+                let onClickAction = `addToCart('${product.name}', ${product.price})`;
+                let initialDesc = "";
+
+                if(product.hasVariants && product.variants.length > 0) {
+                    const selectId = `select-variant-${idx}`;
+                    variantSelector = `<select id="${selectId}" onchange="updateLiveRowData(this, ${idx})" onclick="event.stopPropagation()" class="bg-slate-50 border border-slate-200 rounded-lg p-1 text-[11px] font-bold text-slate-700 focus:outline-none">`;
+                    product.variants.forEach((v, vIdx) => {
+                        variantSelector += `<option value="${v.price}" data-index="${vIdx}">${v.name}</option>`;
+                    });
+                    variantSelector += `</select>`;
+                    finalPriceDisplay = `₹${product.variants[0].price}`;
+                    initialImg = product.variants[0].image || product.image;
+                    initialDesc = product.variants[0].desc || "";
+                    onClickAction = `addVariantToCartFromRow(${idx}, '${selectId}')`;
+                } else {
+                    variantSelector = `<span class="text-slate-300 text-xs">— Standard —</span>`;
+                }
+
+                row.setAttribute('onclick', onClickAction);
+                row.id = `product-row-${idx}`;
+                row.innerHTML = `
+                    <div class="flex items-center justify-between w-full">
+                        <div class="w-12 shrink-0"><img id="billing-img-${idx}" src="${initialImg}" class="w-10 h-10 object-cover rounded-lg border bg-slate-50"></div>
+                        <div class="flex-1 min-w-0 pr-2 pl-3">
+                            <p class="font-semibold text-slate-700 text-xs md:text-sm truncate">${product.name}</p>
+                            <p id="billing-desc-${idx}" class="text-[11px] text-slate-400 font-medium truncate mt-0.5">${initialDesc}</p>
+                        </div>
+                        <div class="w-44 text-center shrink-0">${variantSelector}</div>
+                        <div class="w-20 text-center shrink-0"><span class="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold">HP-${product.id}</span></div>
+                        <div class="w-20 text-right shrink-0"><span id="price-display-${idx}" class="text-blue-600 font-bold text-xs md:text-sm">${finalPriceDisplay}</span></div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function updateLiveRowData(selectEl, rowIdx) {
+            const selectedOpt = selectEl.options[selectEl.selectedIndex];
+            const vIdx = parseInt(selectedOpt.getAttribute('data-index'));
+            const price = parseFloat(selectEl.value);
+            const product = window.productsDatabase.filter(p => p.category === window.currentActiveTab && !p.isDisabled)[rowIdx];
+            const variantData = product.variants[vIdx];
+
+            document.getElementById(`price-display-${rowIdx}`).innerText = `₹${price}`;
+            document.getElementById(`billing-img-${rowIdx}`).src = variantData.image || product.image;
+            document.getElementById(`billing-desc-${rowIdx}`).innerText = variantData.desc || "";
+            document.getElementById(`product-row-${rowIdx}`).setAttribute('onclick', `addToCart('${product.name} (${variantData.name})', ${price})`);
+        }
+
+        function addVariantToCartFromRow(rowIdx, selectId) {
+            const dropdown = document.getElementById(selectId);
+            const price = parseFloat(dropdown.value);
+            const optText = dropdown.options[dropdown.selectedIndex].text;
+            const product = window.productsDatabase.filter(p => p.category === window.currentActiveTab && !p.isDisabled)[rowIdx];
+            addToCart(`${product.name} (${optText})`, price);
+        }
+
+        // RENDER ADMIN TABLE WITH HIDE & DELETE CONTROL
+        function renderAdminInventoryTable() {
             const body = document.getElementById('adminInventoryTableBody');
             body.innerHTML = "";
 
             window.productsDatabase.forEach((product, idx) => {
                 const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-100 text-xs hover:bg-slate-50/50";
+                tr.className = `border-b border-slate-100 text-xs hover:bg-slate-50/50 ${product.isDisabled ? 'bg-red-50/40 opacity-70' : ''}`;
                 const svgId = `barcode-svg-admin-${idx}`;
                 const imgTag = product.image ? `<img src="${product.image}" class="w-8 h-8 object-cover rounded border">` : `<span class="material-icons text-slate-300">image</span>`;
                 
@@ -492,24 +522,28 @@
                 
                 if(product.hasVariants) {
                     product.variants.forEach(v => { 
-                        detailColumnHTML += `<div class="mb-1 text-[11px] bg-slate-50 p-1 rounded border border-slate-100">
-                            <b>${v.name}</b>: ₹${v.price}<br><span class="text-slate-400 text-[10px]">${v.desc || 'No Description'}</span>
-                        </div>`; 
+                        detailColumnHTML += `<div class="mb-1 text-[10px] bg-white p-1 rounded border"><b>${v.name}</b>: ₹${v.price}</div>`; 
                     });
                     printPrice = product.variants[0].price;
                 } else {
                     detailColumnHTML = `<span class="font-mono text-slate-700">₹${product.price.toFixed(2)}</span>`;
                 }
 
+                // ഹൈഡ് ബട്ടൺ ടെക്സ്റ്റ് സെറ്റപ്പ്
+                const hideBtnText = product.isDisabled ? "Show (ലഭ്യമാക്കുക)" : "Hide (ഒഴിവാക്കുക)";
+                const hideBtnColor = product.isDisabled ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200";
+
                 tr.innerHTML = `
                     <td class="py-2.5 pl-2">${imgTag}</td>
-                    <td class="py-2.5 font-bold text-slate-800">${product.name}</td>
+                    <td class="py-2.5 font-bold text-slate-800">${product.name} ${product.isDisabled ? '<span class="text-red-500 text-[10px] bg-red-100 px-1 rounded ml-1">HIDDEN</span>':''}</td>
                     <td class="py-2.5 uppercase text-[10px] font-bold text-blue-600">${product.category}</td>
                     <td class="py-2.5">${detailColumnHTML}</td>
-                    <td class="py-1 flex justify-center"><svg id="${svgId}"></svg></td>
-                    <td class="py-2.5 text-right pr-4 space-x-1">
-                        <button onclick="loadProductToEditForm('${product.id}')" class="bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-500 hover:text-white px-2 py-1 rounded-md font-bold cursor-pointer transition">Edit</button>
-                        <button onclick="printSingleBarcode('${product.name}', ${printPrice}, 'HP-${product.id}')" class="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white px-2 py-1 rounded-md font-bold cursor-pointer transition inline-flex items-center gap-0.5"><span class="material-icons text-xs">print</span> Print</button>
+                    <td class="py-1 flex flex-col items-center justify-center"><svg id="${svgId}"></svg></td>
+                    <td class="py-2.5 text-right pr-4 space-y-1">
+                        <button onclick="loadProductToEditForm('${product.id}')" class="bg-amber-50 text-amber-600 border border-amber-200 px-2 py-1 rounded-md font-bold cursor-pointer text-[11px]">Edit</button>
+                        <button onclick="toggleHideProductInCloud('${product.id}', ${product.isDisabled})" class="${hideBtnColor} border px-2 py-1 rounded-md font-bold cursor-pointer text-[11px]">${hideBtnText}</button>
+                        <button onclick="printSingleBarcode('${product.name}', ${printPrice}, 'HP-${product.id}')" class="bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded-md font-bold cursor-pointer text-[11px] inline-flex items-center gap-0.5"><span class="material-icons text-[10px]">print</span> Label</button>
+                        <button onclick="deleteProductFromCloud('${product.id}')" class="bg-red-50 text-red-600 border border-red-200 px-2 py-1 rounded-md font-bold cursor-pointer text-[11px]">Delete</button>
                     </td>
                 `;
                 body.appendChild(tr);
@@ -517,54 +551,7 @@
             });
         }
 
-        window.loadProductToEditForm = function(id) {
-            const p = window.productsDatabase.find(item => item.id === id);
-            if(!p) return;
-
-            window.isEditMode = true;
-            document.getElementById('editProductId').value = p.id;
-            document.getElementById('formTitle').innerHTML = `<span class="material-icons text-amber-500 text-lg">edit</span> പ്രൊഡക്റ്റ് എഡിറ്റ് ചെയ്യുന്നു (ID: HP-${p.id})`;
-            document.getElementById('cancelEditFormBtn').classList.remove('hidden');
-            document.getElementById('adminPName').value = p.name;
-            document.getElementById('adminPCategory').value = p.category;
-            document.getElementById('adminPImage').value = p.image || "";
-
-            toggleAdminVariantFields();
-
-            if(p.hasVariants) {
-                if(p.variants[0]) {
-                    document.getElementById('vOpt1Name').value = p.variants[0].name || "";
-                    document.getElementById('vOpt1Price').value = p.variants[0].price || "";
-                    document.getElementById('vOpt1Img').value = p.variants[0].image || "";
-                    document.getElementById('vOpt1Desc').value = p.variants[0].desc || "";
-                }
-                if(p.variants[1]) {
-                    document.getElementById('vOpt2Name').value = p.variants[1].name || "";
-                    document.getElementById('vOpt2Price').value = p.variants[1].price || "";
-                    document.getElementById('vOpt2Img').value = p.variants[1].image || "";
-                    document.getElementById('vOpt2Desc').value = p.variants[1].desc || "";
-                }
-            } else {
-                document.getElementById('adminPPrice').value = p.price || "";
-            }
-            document.getElementById('adminView').scrollTop = 0;
-        }
-
-        // ബില്ലുകൾ ക്ലൗഡിലേക്ക് അപ്‌ലോഡ് ചെയ്യാനുള്ള ഫംഗ്ഷൻ
-        window.saveBillToCloud = async function(cartData, finalTotal) {
-            try {
-                await addDoc(billsRef, {
-                    items: cartData,
-                    total: finalTotal,
-                    timestamp: new Date()
-                });
-            } catch (err) {
-                console.error("ബില്ല് ക്ലൗഡിൽ സേവ് ചെയ്യാൻ സാധിച്ചില്ല: ", err);
-            }
-        }
-    </script>
-
-    <script>
+        // BARCODE SCANNER LOGIC
         function toggleCameraScanner() {
             const scannerDiv = document.getElementById('scannerContainer');
             if(scannerDiv.classList.contains('hidden')) {
@@ -572,72 +559,72 @@
                 startLiveCameraScan();
             } else {
                 scannerDiv.classList.add('hidden');
-                if(window.html5QrcodeScanner) {
-                    window.html5QrcodeScanner.stop().catch(err => console.log(err));
-                }
+                if(window.html5QrcodeScanner) { window.html5QrcodeScanner.stop().catch(err => console.log(err)); }
             }
         }
 
         function startLiveCameraScan() {
             window.html5QrcodeScanner = new Html5Qrcode("interactiveScannerView");
-            const config = { fps: 20, qrbox: { width: 280, height: 160 } };
-            
+            const config = { fps: 25, qrbox: { width: 280, height: 160 } };
             window.html5QrcodeScanner.start(
-                { facingMode: "environment" }, 
-                config,
-                (decodedText) => {
-                    processScannedCodeInput(decodedText);
-                    toggleCameraScanner(); 
-                },
+                { facingMode: "environment" }, config,
+                (decodedText) => { processScannedCodeInput(decodedText); toggleCameraScanner(); },
                 (errorMessage) => {}
-            ).catch(err => alert("ക്യാമറ ഓപ്പൺ ചെയ്യാൻ അനുവാദം നൽകുക!"));
+            ).catch(err => alert("കാമറ അനുവാദം തരിക!"));
         }
 
-        // ക്യാമറയിൽ നിന്നും ഇൻപുട്ടിൽ നിന്നും വരുന്ന ബാർകോഡ് പ്രൊസസ്സ് ചെയ്യുന്ന ഭാഗം
         function processScannedCodeInput(codeValue) {
             if(!codeValue) return;
             const cleaned = codeValue.trim().toUpperCase();
-            
-            // HP-1001 അല്ലെങ്കിൽ വെറും 1001 എന്ന് വന്നാലും കറക്റ്റ് ആയി മാച്ച് ചെയ്യാൻ വേണ്ടിയുള്ള ലോജിക്
-            const target = window.productsDatabase.find(p => {
-                const fullBarcodeId = `HP-${p.id}`.toUpperCase();
-                return fullBarcodeId === cleaned || p.id.toString().toUpperCase() === cleaned;
-            });
+            const target = window.productsDatabase.find(p => `HP-${p.id}`.toUpperCase() === cleaned || p.id.toString().toUpperCase() === cleaned);
 
             if(target) {
+                if(target.isDisabled) { alert("ഈ ഉൽപ്പന്നം താൽക്കാലികമായി അഡ്മിൻ ഹൈഡ് ചെയ്തു വെച്ചിരിക്കുകയാണ്!"); return; }
                 if(target.hasVariants && target.variants.length > 0) {
                     addToCart(`${target.name} (${target.variants[0].name})`, target.variants[0].price);
                 } else {
                     addToCart(target.name, target.price);
                 }
-            } else {
-                alert(`HP Barcode സിസ്റ്റത്തിൽ ഈ ഉൽപ്പന്നം കണ്ടെത്താനായില്ല: ${cleaned}`);
-            }
+            } else { alert(`ഉൽപ്പന്നം കണ്ടെത്തിയില്ല: ${cleaned}`); }
         }
 
-        // ബില്ല് കംപ്ലീറ്റ് ചെയ്ത് ക്ലൗഡിലേക്ക് സേവ് ചെയ്യുകയും പ്രിന്റ് എടുക്കുകയും ചെയ്യുന്നു
+        // COMPLETE & PRINT THERMAL BILL WITH SIZE OPTIONS
         function triggerInvoiceBillPrint() {
             if(window.cart.length === 0) return;
+            const size = document.getElementById('invoicePrintSize').value;
+            const cName = document.getElementById('customerName').value.trim() || "Walk-In Customer";
+            const cPhone = document.getElementById('customerPhone').value.trim() || "N/A";
+            
             const printArea = document.getElementById('printContent');
+            const printSection = document.getElementById('printSection');
             let dateStr = new Date().toLocaleString();
             let totalAmount = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
-            // 1. ക്ലൗഡ് ഫയർബേസിലേക്ക് ആദ്യം ബില്ല് സേവ് ചെയ്യുന്നു
-            window.saveBillToCloud(window.cart, totalAmount);
+            // ക്ലൗഡിലേക്ക് വിവരങ്ങൾ സമർപ്പിക്കുന്നു
+            window.saveBillToCloud(window.cart, totalAmount, cName, cPhone);
 
-            // 2. പ്രിന്റിംഗ് ലേഔട്ട് നിർമ്മിക്കുന്നു
+            // പ്രിന്റിംഗ് പേപ്പർ വീതി നിശ്ചയിക്കുന്നു
+            let widthStyle = "80mm"; // Default 3 inch
+            if(size === '2inch') widthStyle = "58mm";
+            if(size === '4x6') widthStyle = "100mm";
+
             let billHTML = `
-                <div style="text-align: center; font-family: monospace; max-width: 80mm; font-size:12px; color:#000; padding:5px;">
-                    <h3 style="margin:0; font-size:16px; font-weight:bold;">HEAVEN PEACE</h3>
-                    <p style="margin:2px 0;">Wholesale & Custom Gifts Store</p>
-                    <p style="margin:2px 0;">Date: ${dateStr}</p>
-                    <hr style="border-top:1px dashed #000; margin:8px 0;">
+                <div class="print-wrapper" style="width: ${widthStyle}; text-align: center; font-family: monospace; color:#000; font-size:12px; padding:4px; margin:0 auto;">
+                    <h3 style="margin:0; font-size:16px; font-weight:bold; tracking-wider">HEAVEN PEACE</h3>
+                    <p style="margin:2px 0; font-size:10px;">Wholesale & Customized Gift Store</p>
+                    <hr style="border-top:1px dashed #000; margin:6px 0;">
+                    <div style="text-align:left; font-size:11px; margin-bottom:5px; line-height:1.3;">
+                        <b>Cust:</b> ${cName}<br>
+                        <b>Phone:</b> ${cPhone}<br>
+                        <b>Date:</b> ${dateStr}
+                    </div>
+                    <hr style="border-top:1px dashed #000; margin:6px 0;">
                     <table style="width:100%; text-align:left; font-size:11px; border-collapse:collapse;">
                         <thead>
                             <tr style="border-bottom:1px dashed #000;">
-                                <th style="padding-bottom:4px;">Item</th>
-                                <th style="text-align:center; padding-bottom:4px;">Qty</th>
-                                <th style="text-align:right; padding-bottom:4px;">Total</th>
+                                <th style="padding-bottom:3px;">Item Details</th>
+                                <th style="text-align:center; padding-bottom:3px;">Qty</th>
+                                <th style="text-align:right; padding-bottom:3px;">Total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -646,9 +633,9 @@
             window.cart.forEach(item => {
                 billHTML += `
                     <tr>
-                        <td style="padding:3px 0;">${item.name}</td>
-                        <td style="text-align:center; padding:3px 0;">${item.qty}</td>
-                        <td style="text-align:right; padding:3px 0;">₹${(item.price * item.qty).toFixed(2)}</td>
+                        <td style="padding:4px 0; max-width:140px; word-wrap:break-word;">${item.name}</td>
+                        <td style="text-align:center; padding:4px 0;">${item.qty}</td>
+                        <td style="text-align:right; padding:4px 0;">₹${(item.price * item.qty).toFixed(2)}</td>
                     </tr>
                 `;
             });
@@ -656,83 +643,98 @@
             billHTML += `
                         </tbody>
                     </table>
-                    <hr style="border-top:1px dashed #000; margin:8px 0;">
-                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:13px;">
-                        <span>Grand Total:</span>
+                    <hr style="border-top:1px dashed #000; margin:6px 0;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:13px; padding:2px 0;">
+                        <span>GRAND TOTAL:</span>
                         <span>₹${totalAmount.toFixed(2)}</span>
                     </div>
-                    <hr style="border-top:1px dashed #000; margin:8px 0;">
-                    <p style="margin-top:5px; font-weight:bold;">Thank you for shopping!</p>
+                    <hr style="border-top:1px dashed #000; margin:6px 0;">
+                    <p style="margin-top:6px; font-size:11px; font-weight:bold;">Thank You. Visit Again!</p>
                 </div>
             `;
 
             printArea.innerHTML = billHTML;
             window.print();
+            
+            // ക്ലിയർ ഫോം ആൻഡ് കാർട്ട്
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
             clearCart();
         }
 
-        // പഴയ ബില്ലുകൾ റീ-പ്രിന്റ് ചെയ്യാനുള്ള ഫംഗ്ഷൻ
+        // SINGLE LABELS BARCODE PRINT (4x6 OR DIRECT ADHESIVE)
+        function printSingleBarcode(name, price, barcodeVal) {
+            const printArea = document.getElementById('printContent');
+            printArea.innerHTML = `
+                <div style="width: 100mm; height: 150mm; font-family: monospace; padding: 25px 10px; text-align: center; color:#000; display:flex; flex-col; justify-content:center; items-center;">
+                    <div style="border: 2px solid #000; padding: 15px; border-radius:10px; width:100%;">
+                        <h2 style="font-size: 16px; font-weight: bold; margin: 0 0 5px 0; text-transform:uppercase;">HEAVEN PEACE</h2>
+                        <h3 style="font-size: 13px; font-weight: bold; margin: 0;">${name}</h3>
+                        <p style="font-size: 14px; margin: 6px 0; font-weight:bold;">PRICE: ₹${price.toFixed(2)}</p>
+                        <div style="display:flex; justify-content:center; margin-top:10px;"><svg id="labelBarcodeTarget"></svg></div>
+                    </div>
+                </div>
+            `;
+            JsBarcode("#labelBarcodeTarget", barcodeVal, { format: "CODE128", width: 2.2, height: 55, displayValue: true, fontSize: 12 });
+            window.print();
+        }
+
+        // DUPLICATE RE-PRINT FUNCTION
         window.printOldInvoice = function(billData) {
             const printArea = document.getElementById('printContent');
             let dateStr = billData.timestamp ? billData.timestamp.toDate().toLocaleString() : new Date().toLocaleString();
+            let cName = billData.customerName || "Walk-In";
+            let cPhone = billData.customerPhone || "N/A";
 
             let billHTML = `
-                <div style="text-align: center; font-family: monospace; max-width: 80mm; font-size:12px; color:#000; padding:5px;">
-                    <h3 style="margin:0; font-size:16px; font-weight:bold;">HEAVEN PEACE</h3>
-                    <p style="margin:2px 0; font-weight:bold;">[ DUPLICATE BILL ]</p>
-                    <p style="margin:2px 0;">Date: ${dateStr}</p>
-                    <hr style="border-top:1px dashed #000; margin:8px 0;">
-                    <table style="width:100%; text-align:left; font-size:11px; border-collapse:collapse;">
-                        <thead>
-                            <tr style="border-bottom:1px dashed #000;">
-                                <th style="padding-bottom:4px;">Item</th>
-                                <th style="text-align:center; padding-bottom:4px;">Qty</th>
-                                <th style="text-align:right; padding-bottom:4px;">Total</th>
-                            </tr>
-                        </thead>
+                <div style="width: 80mm; text-align: center; font-family: monospace; color:#000; font-size:12px; padding:5px; margin:0 auto;">
+                    <h3 style="margin:0; font-size:15px; font-weight:bold;">HEAVEN PEACE</h3>
+                    <p style="margin:2px 0; font-weight:bold; font-size:10px;">[ DUPLICATE INVOICE ]</p>
+                    <hr style="border-top:1px dashed #000; margin:6px 0;">
+                    <div style="text-align:left; font-size:11px; line-height:1.3;">
+                        <b>Cust:</b> ${cName}<br>
+                        <b>Phone:</b> ${cPhone}<br>
+                        <b>Date:</b> ${dateStr}
+                    </div>
+                    <hr style="border-top:1px dashed #000; margin:6px 0;">
+                    <table style="width:100%; text-align:left; font-size:11px;">
                         <tbody>
             `;
-
             billData.items.forEach(item => {
                 billHTML += `
                     <tr>
-                        <td style="padding:3px 0;">${item.name}</td>
-                        <td style="text-align:center; padding:3px 0;">${item.qty}</td>
-                        <td style="text-align:right; padding:3px 0;">₹${(item.price * item.qty).toFixed(2)}</td>
+                        <td style="padding:4px 0;">${item.name}</td>
+                        <td style="text-align:center;">${item.qty}</td>
+                        <td style="text-align:right;">₹${(item.price * item.qty).toFixed(2)}</td>
                     </tr>
                 `;
             });
-
             billHTML += `
                         </tbody>
                     </table>
-                    <hr style="border-top:1px dashed #000; margin:8px 0;">
-                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:13px;">
-                        <span>Grand Total:</span>
+                    <hr style="border-top:1px dashed #000; margin:6px 0;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                        <span>TOTAL PAID:</span>
                         <span>₹${billData.total.toFixed(2)}</span>
                     </div>
-                    <hr style="border-top:1px dashed #000; margin:8px 0;">
+                    <hr style="border-top:1px dashed #000; margin:6px 0;">
                 </div>
             `;
-
             printArea.innerHTML = billHTML;
             window.print();
         }
 
-        function printSingleBarcode(name, price, barcodeVal) {
-            const printArea = document.getElementById('printContent');
-            printArea.innerHTML = `
-                <div style="font-family: monospace; padding: 10px; text-align: center; color:#000;">
-                    <h2 style="font-size: 13px; font-weight: bold; margin: 0;">${name}</h2>
-                    <p style="font-size: 11px; margin: 3px 0;">Price: ₹${price.toFixed(2)}</p>
-                    <div style="display:flex; justify-content:center;"><svg id="labelBarcodeTarget"></svg></div>
-                </div>
-            `;
-            JsBarcode("#labelBarcodeTarget", barcodeVal, { format: "CODE128", width: 2, height: 45, displayValue: true, fontSize: 11 });
-            window.print();
+        // SYSTEM UI ENGINE INTERFACE GENERAL PLATFORM
+        function switchCategoryTab(tabName) {
+            window.currentActiveTab = tabName;
+            ['products', 'packing', 'combos'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                btn.className = (t === tabName) ? 
+                    "flex-1 py-2 text-xs font-bold rounded-lg bg-white text-blue-600 shadow-sm cursor-pointer" : 
+                    "flex-1 py-2 text-xs font-bold rounded-lg text-slate-600 hover:bg-white/50 cursor-pointer";
+            });
+            renderBillingProductsList();
         }
-
-        // GENERAL INTERFACE NAVIGATION
         function toggleAdminVariantFields() {
             const cat = document.getElementById('adminPCategory').value;
             if(cat === 'combos') {
@@ -748,9 +750,7 @@
             document.getElementById('editProductId').value = "";
             document.getElementById('formTitle').innerHTML = `<span class="material-icons text-blue-500 text-lg">add_box</span> പുതിയ പ്രൊഡക്റ്റ് / കോംബോ ചേർക്കുക`;
             document.getElementById('cancelEditFormBtn').classList.add('hidden');
-            document.getElementById('adminPName').value = "";
-            document.getElementById('adminPPrice').value = "";
-            document.getElementById('adminPImage').value = "";
+            document.getElementById('adminPName').value = ""; document.getElementById('adminPPrice').value = ""; document.getElementById('adminPImage').value = "";
             document.getElementById('vOpt1Price').value = ""; document.getElementById('vOpt1Img').value = ""; document.getElementById('vOpt1Desc').value = "";
             document.getElementById('vOpt2Price').value = ""; document.getElementById('vOpt2Img').value = ""; document.getElementById('vOpt2Desc').value = "";
             toggleAdminVariantFields();
@@ -766,7 +766,6 @@
             document.getElementById('billingView').classList.add('hidden');
             document.getElementById('adminView').classList.add('hidden');
             document.getElementById('recentView').classList.add('hidden');
-            
             if(viewId === 'billing') document.getElementById('billingView').classList.remove('hidden');
             else if(viewId === 'admin') document.getElementById('adminView').classList.remove('hidden');
             else if(viewId === 'recent') document.getElementById('recentView').classList.remove('hidden');
@@ -790,6 +789,33 @@
                 closeLoginModal(); switchView('admin');
             } else { document.getElementById('loginError').classList.remove('hidden'); }
         }
+        function loadProductToEditForm(id) {
+            const p = window.productsDatabase.find(item => item.id === id);
+            if(!p) return;
+            window.isEditMode = true;
+            document.getElementById('editProductId').value = p.id;
+            document.getElementById('formTitle').innerHTML = `<span class="material-icons text-amber-500 text-lg">edit</span> എഡിറ്റ് ചെയ്യുന്നു (ID: HP-${p.id})`;
+            document.getElementById('cancelEditFormBtn').classList.remove('hidden');
+            document.getElementById('adminPName').value = p.name;
+            document.getElementById('adminPCategory').value = p.category;
+            document.getElementById('adminPImage').value = p.image || "";
+            toggleAdminVariantFields();
+            if(p.hasVariants) {
+                if(p.variants[0]) {
+                    document.getElementById('vOpt1Name').value = p.variants[0].name || "";
+                    document.getElementById('vOpt1Price').value = p.variants[0].price || "";
+                    document.getElementById('vOpt1Img').value = p.variants[0].image || "";
+                    document.getElementById('vOpt1Desc').value = p.variants[0].desc || "";
+                }
+                if(p.variants[1]) {
+                    document.getElementById('vOpt2Name').value = p.variants[1].name || "";
+                    document.getElementById('vOpt2Price').value = p.variants[1].price || "";
+                    document.getElementById('vOpt2Img').value = p.variants[1].image || "";
+                    document.getElementById('vOpt2Desc').value = p.variants[1].desc || "";
+                }
+            } else { document.getElementById('adminPPrice').value = p.price || ""; }
+            document.getElementById('adminView').scrollTop = 0;
+        }
         function addToCart(name, price) {
             const existingItem = window.cart.find(item => item.name === name);
             if(existingItem) existingItem.qty += 1; else window.cart.push({ name: name, price: price, qty: 1 });
@@ -805,10 +831,8 @@
             const cartList = document.getElementById('cartList');
             const emptyText = document.getElementById('emptyCartText');
             document.querySelectorAll('.invoice-row').forEach(el => el.remove());
-
             if(window.cart.length === 0) { emptyText.classList.remove('hidden'); updateTotal(); toggleMobileCart(false); return; }
             emptyText.classList.add('hidden');
-
             window.cart.forEach((item, index) => {
                 const row = document.createElement('div');
                 row.className = 'invoice-row flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100';
@@ -838,10 +862,12 @@
     </script>
 
     <style>
+        /* പ്രിന്റിംഗ് ചെയ്യുമ്പോൾ പേജിന്റെ ബാക്കി ഭാഗങ്ങൾ പൂർണ്ണമായി മറയ്ക്കാനുള്ള CSS */
         @media print {
             body * { display: none !important; }
             #printSection, #printSection * { display: block !important; }
-            #printSection { position: absolute; left: 0; top: 0; width: 100%; }
+            #printSection { position: absolute; left: 0; top: 0; width: 100%; background: #fff; }
+            @page { margin: 0; }
         }
     </style>
 </body>
